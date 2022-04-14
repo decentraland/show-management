@@ -1,5 +1,5 @@
 {
-  "name": "sdk-library",
+  "name": "show-mgmt-dcl",
   "version": "1.0.0",
   "description": "Dcl SDK Library",
   "main": "./dist/index.js",

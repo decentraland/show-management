@@ -95,7 +95,7 @@ export class RunOfShow{
       //this.intermissionStarted = false
       //this.countdownStarted = false
 
-      if(this.showMgr.currentlyPlaying && runningShow.id !== this.showMgr.currentlyPlaying.id){
+      if((!this.showMgr.currentlyPlaying) || runningShow.id !== this.showMgr.currentlyPlaying.id){
         log('starting show', runningShow,closestNotStartedShow)
         this.showMgr.startShow(runningShow)
       }else{

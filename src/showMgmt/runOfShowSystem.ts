@@ -17,6 +17,10 @@ export class RunOfShow{
   intermissionStarted = false
   countdownStarted = false
   lastShowIdx = 0
+
+  timeLapse = 0
+  checkIntervalSeconds = 1
+  lastInterval = 0//Number.MAX_VALUE
   //day:any
 
   constructor(showMgr:ShowManager){
@@ -27,6 +31,12 @@ export class RunOfShow{
 
   update(dt:number){
     
+    this.timeLapse += dt
+    
+    if(this.timeLapse < this.checkIntervalSeconds){
+      return
+    }
+    this.timeLapse -= this.checkIntervalSeconds
 
     let activeCount = 0
     //FIND NEAREST SHOW THAT HAS NOT STARTED

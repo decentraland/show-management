@@ -33,7 +33,7 @@ export class ShowActionManager{
   randomizerSystem:RandomizerSystem
   
   registeredShowEntities:Record<string,any>={}
-  registeredActionsMap:Record<string,ShowActionHandler>={}
+  registeredActionsMap:Record<string,ShowActionHandler<any>>={}
   //registeredActionsList:ShowActionHandler[] = []
  
   extRunAction:(action: string)=>boolean
@@ -50,10 +50,12 @@ export class ShowActionManager{
   getShowEntityByName(name:string){
     return this.registeredShowEntities[name]
   }
-  registeredHandler(action:ShowActionHandler){
+  registeredHandler(action:ShowActionHandler<any>){
     this.registeredActionsMap[action.getName()] = action
   }
-
+  getRegisteredHandler(name:string):ShowActionHandler<any>{  
+    return this.registeredActionsMap[name]
+  }
   runAction(action: string) {
     log("running action",action)
 
@@ -64,7 +66,7 @@ export class ShowActionManager{
 
     const matchedAction = this.registeredActionsMap[action]
 
-    const handlesApplied:ShowActionHandler[] = []
+    const handlesApplied:ShowActionHandler<any>[] = []
    
     if(matchedAction && matchedAction.matches(action,this)){
       //exact match

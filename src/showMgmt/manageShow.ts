@@ -150,23 +150,33 @@ export class ShowManager{
   registerListenerToSubtitle(subtitleSystem:SubtitleSystem){
     subtitleSystem.addCueListener( 
       (cue: NodeCue,event:SubtitleCueEvent) => {
-        switch(event){
-          case SubtitleCueEvent.CUE_BEGIN:
-            let actionNames = [cue.data.text]
-            if(cue.data.text && cue.data.text.indexOf("\n")){
-              actionNames = cue.data.text.split("\n")
-            }
-            log(`Show subtitle  '${cue.data.text}' (${actionNames.length}) at time: ${cue.data.start}`)
-            
-            //BREAK LINE AND SEND MULTIPLE
-            for(const p in actionNames){
-              //log("sending ",actionNames[p])
-              this.runAction(actionNames[p].trim())
-            }
-          break;
+        try{
+          switch(event){
+            case SubtitleCueEvent.CUE_BEGIN:
+              this.processOnCueBegin(cue)
+            break;
+          }
+        }catch(e){ 
+          //DO not let this error bubble up, or state will be lost and all listeners wont get notified
+          //it will cause them to be retried over and over.  maybe we want this at some point but not right now
+          log("WARNING ManageShow processOnCueBegin listener failed. Catching so others can complete",event,cue)
         }
       }
     )
+  }
+
+  processOnCueBegin(cue: NodeCue) {
+    let actionNames = [cue.data.text]
+    if (cue.data.text && cue.data.text.indexOf("\n")) {
+      actionNames = cue.data.text.split("\n")
+    }
+    log(`Show subtitle  '${cue.data.text}' (${actionNames.length}) at time: ${cue.data.start}`)
+
+    //BREAK LINE AND SEND MULTIPLE
+    for (const p in actionNames) {
+      //log("sending ",actionNames[p])
+      this.runAction(actionNames[p].trim())
+    }
   }
 
   playVideo(showData: ShowType, offsetSeconds: number) {

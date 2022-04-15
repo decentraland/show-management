@@ -35,6 +35,8 @@ export class ShowActionManager{
   registeredShowEntities:Record<string,any>={}
   registeredActionsMap:Record<string,ShowActionHandler<any>>={}
   //registeredActionsList:ShowActionHandler[] = []
+
+  //silenceHandlerErrors:boolean = false;
  
   extRunAction:(action: string)=>boolean
   overrideRunAction:(action: string)=>boolean
@@ -68,31 +70,32 @@ export class ShowActionManager{
 
     const handlesApplied:ShowActionHandler<any>[] = []
    
-    if(matchedAction && matchedAction.matches(action,this)){
-      //exact match
-      log("execute calling for ",action)
-      matchedAction.execute(action,this)
-      handlesApplied.push(matchedAction)
-    }else{
-      //loop and try searching
-      mainLoop:
-      for(const p in this.registeredActionsMap){
-        const handler = this.registeredActionsMap[p]
+    
+      if(matchedAction && matchedAction.matches(action,this)){
+        //exact match
+        log("execute calling for ",action)
+        this.executeHandler(action, matchedAction)
+        handlesApplied.push(matchedAction)
+      }else{
+        //loop and try searching
+        mainLoop:
+        for(const p in this.registeredActionsMap){
+          const handler = this.registeredActionsMap[p]
 
-        if(handler && !handler.matches){
-          log("does not have matches ",matchedAction.matches) 
-        }
+          if(handler && !handler.matches){
+            log("does not have matches ",matchedAction.matches) 
+          }
 
-        if(handler && handler.matches(action,this)){
-          log("execute calling for ",action)
-          handler.execute(action,this)
+          if(handler && handler.matches(action,this)){
+            this.executeHandler(action, handler)
 
-          handlesApplied.push(handler)
-          //if(handler.isLast()) break mainLoop
-          break mainLoop
+            handlesApplied.push(handler)
+            //if(handler.isLast()) break mainLoop
+            break mainLoop
+          }
         }
       }
-    }
+    
 
     // NOTE: STOPALL, PAUSEALL and default must always exist
     switch (action) {
@@ -116,6 +119,24 @@ export class ShowActionManager{
 
   }
 
+
+  private executeHandler(action: string, handler: ShowActionHandler<any>,) {
+    try{ 
+      log("EXECUTING HANDLER ",action,handler)  
+      handler.execute(action, this)
+    }catch(e){
+      //log("FAILED EXECUTING HANDLER ",action,handler,e)  
+      //this.onHandlerFailure()
+      //if(!throwHandlerErrors) throw e;
+      this.onHandlerFailure(action,handler,e)
+
+      throw e  
+    }
+  } 
+
+  onHandlerFailure(action: string, handler: ShowActionHandler<any>, e: any) {
+    log("FAILED EXECUTING HANDLER ",action,handler,e)  
+  }
 }
 
 const RESET_ANIMATION_ON_PLAY = true

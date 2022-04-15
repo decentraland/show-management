@@ -267,8 +267,8 @@ export function parseActionWithOpts<T>(str: string):ActionParams<T> {
     try{
       const obj = JSON.parse(json)
       result.params = obj
-    }catch(e){
-      log("failed to parse ",str,json,e)
+    }catch(e){     
+      log("FAILED to parse ",str,json,e)
       throw e
     } 
   }

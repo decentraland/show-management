@@ -40,7 +40,7 @@ export class ShowSchedule{
     //log("findShowToPlayByTime")
     //if (FAKING_LOCALLY) return
   
-    const showMatch:ShowMatchRangeResult = {}
+    let showMatch:ShowMatchRangeResult = {}
 
     if(!this.showData){
       return showMatch
@@ -49,45 +49,89 @@ export class ShowSchedule{
     try {
       //debugger  
       let worldDate = await fetchWorldTime()
-      const unixTime = worldDate.getTime()/1000
-
-      let showPlaying: ShowType
-      let counter = 0
-      let showPlayingIndex = -1
-
-      const sortedShows = this.shows
-
       
-      for (let show of sortedShows) {
-         
-        if (
-          show.startTime < unixTime 
-          && show.startTime + show.length > unixTime
-        ) {
-          showPlaying = show
-          showPlayingIndex = counter
-          break;
-        }
-        counter++
+
+      showMatch = this.findShowToPlayByDate(worldDate)
+  
+    } catch (e) {
+      log('error getting shows to play ', e)
+    }
+    return showMatch
+  }
+
+  findShowToPlayByDate(date:Date):ShowMatchRangeResult{
+    const showMatch:ShowMatchRangeResult = {}
+
+    const unixTime = date.getTime()/1000
+
+    let showPlaying: ShowType
+    let counter = 0
+    let showPlayingIndex = -1
+
+    const sortedShows = this.shows
+
+    //debugger
+    
+    let nearestShowToNow
+    let nearestShowIndex = 0
+    let nearestShowToNowDiff=Number.MAX_VALUE
+
+    //debugger
+    for (let show of sortedShows) {
+      if (    
+        show.startTime > 0
+        && show.startTime < unixTime 
+        && show.startTime + show.length > unixTime
+      ) {
+        showPlaying = show
+        showPlayingIndex = counter
+        break;
+      } 
+      
+      var showDiff = show.startTime - unixTime
+      if(show.startTime > 0 && showDiff < nearestShowToNowDiff){
+        nearestShowToNow = show
+        nearestShowIndex = counter
+        nearestShowToNowDiff = showDiff
       }
 
-      if(showPlaying !== undefined){
-        showMatch.currentShow = {show:showPlaying,offset:-1}
-        showMatch.currentShow.offset = unixTime - showPlaying.startTime
-      }
+      counter++
+    }
+
+    if(showPlaying !== undefined){
+      showMatch.currentShow = {show:showPlaying,offset:-1}
+      showMatch.currentShow.offset = unixTime - showPlaying.startTime
+      
       if( showPlayingIndex - 1 > 0 ){
         showMatch.lastShow = {show:sortedShows[showPlayingIndex -1],offset:-1}
         showMatch.lastShow.offset = unixTime - showMatch.lastShow.show.startTime
       }
       if( showPlayingIndex + 1 < sortedShows.length ){
         showMatch.nextShow = {show:sortedShows[showPlayingIndex +1],offset:-1}
-        showMatch.nextShow.offset = unixTime - showMatch.nextShow.show.startTime
+        
       }
-  
-    } catch (e) {
-      log('error getting shows to play ', e)
+    }else{
+      if(nearestShowToNow.startTime < unixTime){
+        //in past
+        showMatch.lastShow = {show:sortedShows[nearestShowIndex],offset:-1}
+        showMatch.lastShow.offset = unixTime - showMatch.lastShow.show.startTime
+
+        if( nearestShowIndex + 1 < sortedShows.length ){
+          showMatch.nextShow = {show:sortedShows[nearestShowIndex +1],offset:-1}
+        }
+      }else{
+        //in future
+        showMatch.nextShow = {show:nearestShowToNow,offset:-1}
+      
+      }
     }
-    return showMatch
+
+    if(showMatch.nextShow && showMatch.nextShow.show){
+      showMatch.nextShow.offset = showMatch.nextShow.show.startTime - unixTime
+    }
+    
+
+    return showMatch;
   }
   
 }

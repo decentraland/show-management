@@ -181,10 +181,7 @@ export class SubtitleSystem implements ISystem {
   update(dt: number) {
     if (this.offsetMs != SubtitleSystem.INVALID_OFFSET && !this.paused) {
       let newOffset = this.offsetMs + dt * 1000.0
-      //take it back.  and why like this, does not seem to do it right
-      /*while (newOffset > this.maxEndOffsetMs) {
-        newOffset -= this.maxEndOffsetMs
-      }*/
+      //if past end, pin it to end
       if(this.maxEndOffsetMs > 0 && newOffset > this.maxEndOffsetMs){
         newOffset = this.maxEndOffsetMs
         this.paused = true //at the end, pause/stop it

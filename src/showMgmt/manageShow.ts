@@ -368,14 +368,14 @@ export class CustomVideoSystem extends VideoSystem {
 }
 
 // instance systems
-function videoStatusAsString(status:VideoStatus){
+function videoStatusAsString(status:VideoStatus){ 
   switch(status){
-    case VideoStatus.PLAYING:  return "PLAYING"
-    case VideoStatus.LOADING:  return "LOADING"
-    case VideoStatus.BUFFERING:  return "BUFFERING"
-    case VideoStatus.ERROR:  return "ERROR"
-    case VideoStatus.READY:  return "READY"
-    case VideoStatus.NONE:  return "NONE"
+    case VideoStatus.PLAYING:  return "PLAYING" //4
+    case VideoStatus.LOADING:  return "LOADING" //2
+    case VideoStatus.BUFFERING:  return "BUFFERING" //5
+    case VideoStatus.ERROR:  return "ERROR" //1
+    case VideoStatus.READY:  return "READY" //3
+    case VideoStatus.NONE:  return "NONE" //0
     default: return "UNKNOWN:"+status  
   }
 }

@@ -19,7 +19,7 @@ export class RunOfShow{
   lastShowIdx = 0
 
   timeLapse = 0
-  checkIntervalSeconds = 1
+  checkIntervalSeconds = .1
   lastInterval = 0//Number.MAX_VALUE
   //day:any
 

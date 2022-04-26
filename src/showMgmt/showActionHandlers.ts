@@ -215,9 +215,124 @@ export class ShowBpmActionHandler extends ShowActionHandlerSupport<number>{
     if (show.randomizerSystem) {
       show.randomizerSystem.reset()
     }
-
   }
 } 
+
+
+export type DefineActionAlias={
+  action:string
+}
+export type DefineTargetGroupType={
+  targets?:any[]
+  targetNames?:string[]
+}
+export type DefineActionParams<T>={
+  type:string
+  name:string
+  opts?:T
+}
+
+export class DefineTargetGroup{
+  targetNames:string[]
+  targets:any[]
+  constructor(args:DefineTargetGroupType){
+    this.targetNames = args.targetNames
+    this.targets = args.targets
+  }
+}
+
+//DEFINE TARGET_GROUP GRP_NAME []
+//example
+//DEFINE TARGET_GROUP top_lights light1,light2,light3
+
+export class DefineTargetGroupActionHandler extends ShowActionHandlerSupport<DefineActionParams<DefineTargetGroupType>>{
+  public static DEFAULT_NAME = 'DEFINE TARGET_GROUP'
+  constructor(args?:ShowActionSupportArgs<DefineActionParams<DefineTargetGroupType>>){
+    super(DefineTargetGroupActionHandler.DEFAULT_NAME,args)
+  }
+
+  matches(action: string, showActionMgr: ShowActionManager): boolean {
+    //log('CUSTOM matches SAY fired',this.getName(),action)
+    return actionStartsWith(action,this.name,0," ") 
+  } 
+  decodeAction(action: string, showActionMgr: ShowActionManager): ActionParams<DefineActionParams<DefineTargetGroupType>> {
+    var result:ActionParams<DefineActionParams<DefineTargetGroupType>>={array:[]}
+    const arr = splitByWhiteSpace(action)
+
+    result.array = arr
+  
+    //convert to type
+    result.params = { type: arr[1],name:arr[2] }
+
+    const targets:string[] = []
+    for(let x=3;x<arr.length;x++){
+      const val:string[] = arr[x].split(",")
+      for(const p in val){
+        targets.push(val[p].trim())
+      }
+    }
+    result.params.opts = {targetNames:targets}
+    
+    return result 
+  }
+  process(action: ActionParams<DefineActionParams<DefineTargetGroupType>>, showActionMgr: ShowActionManager): boolean {
+    //showActionMgr.en
+    //action.params.opts.targets
+    showActionMgr.registerShowEntity(action.params.name,new DefineTargetGroup(action.params.opts))
+    
+    return true
+  }
+}
+
+
+//DEFINE ACTION CUST_ACTION ACTION.....
+//example
+//DEFINE ACTION DEF_SAY_HI SAY "hi"
+export class DefineActionAliasActionHandler extends ShowActionHandlerSupport<DefineActionParams<DefineActionAlias>>{
+  public static DEFAULT_NAME = 'DEFINE ACTION'
+  constructor(args?:ShowActionSupportArgs<DefineActionParams<DefineActionAlias>>){
+    super(DefineActionAliasActionHandler.DEFAULT_NAME,args)
+  }
+
+  matches(action: string, showActionMgr: ShowActionManager): boolean {
+    //log('CUSTOM matches SAY fired',action)
+    return actionStartsWith(action,this.name,0," ")
+  }
+  decodeAction(action: string, showActionMgr: ShowActionManager): ActionParams<DefineActionParams<DefineActionAlias>> {
+    var result:ActionParams<DefineActionParams<DefineActionAlias>>={array:[]}
+    const arr = splitByWhiteSpace(action)
+
+    result.array = arr
+
+    const optArr = arr.length > 3 ? arr.splice(3).join(" ") : undefined
+
+    //convert to type
+    result.params = { type: arr[1],name:arr[2], opts: {action: optArr} }
+    
+    return result
+  }
+  process(action: ActionParams<DefineActionParams<DefineActionAlias>>, showActionMgr: ShowActionManager): boolean {
+    //register the alias as a new action handler ... very meta
+ 
+    const mainProcessActionArg = action
+    
+    //const handler = new ...
+    showActionMgr.registerHandler( 
+      new ShowBasicActionHandler( mainProcessActionArg.params.name,
+        {
+          process(action: ActionParams<string>, showActionMgr: ShowActionManager): boolean {
+            log("DefineActionAliasActionHandler handling action",action)
+            //debugger
+            showActionMgr.runAction( mainProcessActionArg.params.opts.action )
+            return true
+          }
+        } )
+     )
+    
+    return true
+  }
+}
+
 
 
 export type ActionHandlerAnouncementParams={
@@ -225,7 +340,6 @@ export type ActionHandlerAnouncementParams={
   duration?:number
   color?:string
 }
-
 
 export class ShowAnounceActionHandler extends ShowActionHandlerSupport<ActionHandlerAnouncementParams>{
   public static DEFAULT_NAME = 'ANNOUNCE'

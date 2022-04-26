@@ -1,6 +1,6 @@
 import * as utils from '@dcl/ecs-scene-utils'
 import { ShowManager } from './manageShow'
-import { ShowActionHandler, ShowBpmActionHandler } from './showActionHandlers'
+import { DefineActionAliasActionHandler, DefineTargetGroup, DefineTargetGroupActionHandler, ShowActionHandler, ShowBpmActionHandler } from './showActionHandlers'
 
 // Default beats per minute of show
 export const DEFAULT_BPM = 120
@@ -43,7 +43,11 @@ export class ShowActionManager{
 
   constructor(){ 
     //default registers
-    this.registeredHandler(new ShowBpmActionHandler())
+    this.registerHandler(new ShowBpmActionHandler())
+    this.registerHandler(new DefineTargetGroupActionHandler())
+    this.registerHandler(new DefineActionAliasActionHandler())
+    
+    //this.registerHandler(new ShowBpmActionHandler())
   } 
  
   registerShowEntity(name:string,object:any){

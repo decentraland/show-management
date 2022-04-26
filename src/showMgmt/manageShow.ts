@@ -1,4 +1,5 @@
 import { NodeCue } from '@dcl/subtitle-helper'
+import { isPreviewMode } from '@decentraland/EnvironmentAPI'
 import { SubtitleCueEvent, SubtitleSystem } from '../subtitle/SubtitleSystem'
 /*
 import {
@@ -294,18 +295,27 @@ export class ShowManager{
 
 const canvas = new UICanvas()
 
+let debuggerUI_timeLapse=0
+let debuggerUI_checkIntervalSeconds=.3
+
 const videoTime = new UIText(canvas)
+videoTime.visible=false
 //videoTime.positionX = 0
 //videoTime.positionY = 0
 videoTime.hAlign = 'right'
 videoTime.vAlign = 'bottom'
-
+ 
 const videoStatus = new UIText(canvas)
+videoStatus.visible=false
 videoStatus.positionX = -100
 //videoTime.positionY = 0
 videoStatus.hAlign = 'right'
 videoStatus.vAlign = 'bottom'
 
+isPreviewMode().then(preview=>{
+  videoTime.visible = preview
+  videoStatus.visible = preview
+})
 
 declare type VideoChangeStatusCallback = (oldStatus: VideoStatus, newStatus: VideoStatus) => void;
 export class VideoChangeStatusListener{
@@ -327,6 +337,7 @@ export class CustomVideoSystem extends VideoSystem {
   constructor(_videoTexture: VideoTexture,subtitleSystem?:SubtitleSystem) {
     super(_videoTexture)
     this.subtitleSystem = subtitleSystem
+    debuggerUI_timeLapse=0
   } 
   seek(offsetSeconds:number){
     this.estimatedOffset += offsetSeconds
@@ -360,9 +371,20 @@ export class CustomVideoSystem extends VideoSystem {
     }
   } 
 
+  update(dt: number): void {
+    super.update(dt)
+  }
+ 
   onOffsetUpdate(estimatedOffset: number) {
     //log('SEEK offset changed ', estimatedOffset) 
-    videoTime.value = estimatedOffset +''  
+    
+    if((estimatedOffset-debuggerUI_timeLapse) > debuggerUI_checkIntervalSeconds){
+      debuggerUI_timeLapse = estimatedOffset
+      
+      if(videoTime.visible){
+        videoTime.value = estimatedOffset.toFixed(2) +'/' + this.elapsedTime.toFixed(2)
+      }
+    }
     // mySubtitleSystem.setOffset(estimatedOffset)
   } 
 }

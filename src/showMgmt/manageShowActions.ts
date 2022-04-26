@@ -27,6 +27,13 @@ log("TEST",aa.execute("a",undefined),AA.execute('A',undefined))
  */
 //const showActionMembers = engine.getComponentGroup(ShowActionMember)
 
+export class FindEntityResult{
+  names:string[]
+  results:any[]
+  missing:string[]
+  //resolver:any
+}
+
 export class ShowActionManager{
   defaultBPM:number=DEFAULT_BPM
   bpm:number=DEFAULT_BPM
@@ -56,7 +63,51 @@ export class ShowActionManager{
   getShowEntityByName(name:string){
     return this.registeredShowEntities[name]
   }
-  registeredHandler(action:ShowActionHandler<any>){
+  findShowEntitiesByName(name:string):FindEntityResult{
+    const findEntResult = new FindEntityResult();
+    const arr:any[] = []
+    const missing:string[] = []
+
+    findEntResult.results = arr
+
+    const ent = this.getShowEntityByName(name)
+
+    if(ent instanceof DefineTargetGroup){
+      const grp = ent as DefineTargetGroup
+      if(grp.targets){
+        for(const p in grp.targets){
+          const obj = grp.targets[p] 
+
+          if(obj){
+            arr.push(obj)
+          }else{
+            missing.push(obj)
+          }
+        }
+      }
+      if(grp.targetNames){
+        for(const p in grp.targetNames){
+          const name = grp.targetNames[p] 
+          const obj = this.getShowEntityByName(name)
+
+          if(obj){
+            arr.push(obj)
+          }else{
+            missing.push(obj)
+          }
+        }
+      }
+    }else{
+      arr.push(ent)
+    }
+
+    if(missing.length > 0){
+      findEntResult.missing = missing
+    }
+
+    return findEntResult;
+  }
+  registerHandler(action:ShowActionHandler<any>){
     this.registeredActionsMap[action.getName()] = action
   }
   getRegisteredHandler(name:string):ShowActionHandler<any>{  

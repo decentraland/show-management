@@ -9,14 +9,14 @@ export class ShowActionMember{
 
 export interface ShowActionHandler<T>{
   //name:string
-  matches:(action:string,showActionMgr:ShowActionManager)=>boolean
-  execute:(action:string,showActionMgr:ShowActionManager)=>void
+  matches(action:string,showActionMgr:ShowActionManager):boolean
+  execute(action:string,showActionMgr:ShowActionManager):void
   /**
    * returns the command name
    */
-  getName:()=>string
+  getName():string
 
-  addOnProcessListener:(listener:OnProcessListener<ActionParams<T>>)=>void
+  addOnProcessListener(listener:OnProcessListener<ActionParams<T>>):void
   /**
    * returns the pattern it matches on
    */
@@ -25,7 +25,7 @@ export interface ShowActionHandler<T>{
    * true means no more handlers processed
    */
   //isLast():boolean
-  decodeAction:(action:string,showActionMgr:ShowActionManager)=>ActionParams<T>
+  decodeAction(action:string,showActionMgr:ShowActionManager):ActionParams<T>
 }
 
 

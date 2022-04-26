@@ -1,6 +1,7 @@
 import * as utils from '@dcl/ecs-scene-utils'
 import { ShowManager } from './manageShow'
 import { ShowActionManager } from './manageShowActions'
+import { actionStartsWith } from './utils'
 
 @Component("dcl.show.action.handler")
 export class ShowActionMember{
@@ -55,7 +56,7 @@ export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
     this.callbacks.push(listener)
   }
   matches(action: string,showActionMgr:ShowActionManager):boolean{ 
-    log("OOTB matches called for ",action)
+    log(this.name,"matches()","implement me",action)
     return false 
   }
   execute(action: string,showActionMgr:ShowActionManager):void{ 
@@ -69,7 +70,9 @@ export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
       }
     }
   }
-  process?(action: ActionParams<T>,showActionMgr:ShowActionManager):void{  }
+  process?(action: ActionParams<T>,showActionMgr:ShowActionManager):void{  
+    log(this.name,"process()","implement me",action)
+  }
 
   decodeAction(action: string, showActionMgr: ShowActionManager):ActionParams<T>{
     const parseResult:ActionParams<T> = parseActionWithOpts(action)
@@ -146,10 +149,7 @@ export class ShowAnimationActionHandler extends ShowActionHandlerSupport<ActionH
     return parseResult;
   }
   matches(action: string):boolean{
-    return action.substring(0, this.name.length) == this.name
-  }
-  process(action: ActionParams<ActionHandlerAnimationParams>, showActionMgr: ShowActionManager): void {
-    //log("TEST","decode",action)
+    return actionStartsWith(action,this.getName(),0," ")
   }
 }
 
@@ -161,7 +161,7 @@ export class ShowStopAllActionHandler extends ShowBasicActionHandler{
   }
   //isLast(action: string):boolean{ return false }
   matches(action: string):boolean{
-    return action && action.trim() == this.name
+    return actionStartsWith(action,this.getName(),0," ")
   }
   process(action: ActionParams<string>, showActionMgr: ShowActionManager): boolean {
     log('STOP ALL ')
@@ -176,7 +176,7 @@ export class ShowPauseAllActionHandler extends ShowBasicActionHandler{
   }
   //isLast(action: string):boolean{ return false }
   matches(action: string):boolean{
-    return action && action.trim() == this.name
+    return actionStartsWith(action,this.getName(),0," ")
   }
   process(action: ActionParams<string>, showActionMgr: ShowActionManager): boolean {
     log('PAUSEALL ALL ')
@@ -190,9 +190,10 @@ export class ShowBpmActionHandler extends ShowActionHandlerSupport<number>{
     super(ShowBpmActionHandler.DEFAULT_NAME,args)
   }
   //isLast(action: string):boolean{ return false }
-  matches(action: string):boolean{
-    return action.substring(0, 3) == this.name
-  }
+  matches(action: string):boolean{ 
+    //BPM### is the pattern
+    return actionStartsWith(action,this.getName())
+  } 
   decodeAction(action: string, showActionMgr: ShowActionManager): ActionParams<number> {
     const bpmResults = super.decodeAction(action,showActionMgr)
     
@@ -208,6 +209,7 @@ export class ShowBpmActionHandler extends ShowActionHandlerSupport<number>{
   }
   process(action: ActionParams<number>, showActionMgr: ShowActionManager): void {
     showActionMgr.bpm = action.params
+    
   }
   execute(action: string, show: ShowActionManager){
     // Change BPM
@@ -348,9 +350,15 @@ export class ShowAnounceActionHandler extends ShowActionHandlerSupport<ActionHan
   }
 
   matches(action: string, showActionMgr: ShowActionManager): boolean {
-    log('CUSTOM matches SAY fired',action)
-    return action.indexOf(this.name) == 0
+    //log('CUSTOM matches SAY fired',action)
+    return actionStartsWith(action,this.name,0," ")
   }
+}
+
+
+ export function splitByWhiteSpace(str: string):string[] {
+  //this split includes the white space as part of array results, so remove it 
+  return str.split(/(\s+)/).filter( e => e.trim().length > 0);
 }
 
 /**
@@ -372,7 +380,7 @@ export function parseActionWithOpts<T>(str: string):ActionParams<T> {
   }
   const words = str.substr(0,splitIdx)
   //this split includes the white space as part of array results, so remove it 
-  result.array = words.split(/(\s+)/).filter( e => e.trim().length > 0);
+  result.array = splitByWhiteSpace(words)
   
   if(indexOfJson >= 0){
     const json = str.substr(indexOfJson)

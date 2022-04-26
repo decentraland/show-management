@@ -122,12 +122,11 @@ export class ShowAnimationActionHandler extends ShowActionHandlerSupport<ActionH
     return 'ANIMATE:{TARGET}:options
     {ANIMATIONNAME}:{LOOP}:{DURATION}:{SPEED}:INTERVAL:RESETNIM'
     --start
-    ANIMATE : stage_lights_top : {animationName:'strobe'}
+    ANIMATE : stage_lights_top : {"animationName":"strobe"}
     --stop
-    ANIMATE : stage_lights_top : {animationName:'strobe', play:false}
-
+    ANIMATE : stage_lights_top : {"animationName":"strobe", "play":false}
     --play for 2 seconds and stops itself
-    ANIMATE : stage_lights_top : {animationName:'strobe', duration:2}
+    ANIMATE : stage_lights_top : {"animationName":"strobe", "duration":2}
   }*/
   constructor(args:ShowActionSupportArgs<ActionHandlerAnimationParams>){
     super(ShowAnimationActionHandler.DEFAULT_NAME,args)

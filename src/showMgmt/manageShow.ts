@@ -220,7 +220,7 @@ export class ShowManager{
 
     this.stopShow()
 
-    offsetSeconds += 5
+    //offsetSeconds += 5
 
     this.currentlyPlaying = showData
 

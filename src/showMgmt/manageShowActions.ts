@@ -1,4 +1,6 @@
 import * as utils from '@dcl/ecs-scene-utils'
+import { NodeCue } from '@dcl/subtitle-helper'
+import { IndexedNodeCue } from '../subtitle/SubtitleSystem'
 import { ShowManager } from './manageShow'
 import { DefineActionAliasActionHandler, DefineTargetGroup, DefineTargetGroupActionHandler, ShowActionHandler, ShowBpmActionHandler } from './showActionHandlers'
 
@@ -40,19 +42,21 @@ export class ShowActionManager{
   randomizerSystem:RandomizerSystem
   
   registeredShowEntities:Record<string,any>={}
-  registeredActionsMap:Record<string,ShowActionHandler<any>>={}
+  registeredActionHandlerMap:Record<string,ShowActionHandler<any>>={}
   //registeredActionsList:ShowActionHandler[] = []
 
   //silenceHandlerErrors:boolean = false;
  
   extRunAction:(action: string)=>boolean
   overrideRunAction:(action: string)=>boolean
+  
 
   constructor(){ 
     //default registers
     this.registerHandler(new ShowBpmActionHandler())
     this.registerHandler(new DefineTargetGroupActionHandler())
     this.registerHandler(new DefineActionAliasActionHandler())
+    //this.registerHandler(new RandomizerActionHandler())
     
     //this.registerHandler(new ShowBpmActionHandler())
   } 
@@ -97,8 +101,10 @@ export class ShowActionManager{
           }
         }
       }
-    }else{
+    }else if(ent){
       arr.push(ent)
+    }else{
+      missing.push(name)
     }
 
     if(missing.length > 0){
@@ -108,10 +114,46 @@ export class ShowActionManager{
     return findEntResult;
   }
   registerHandler(action:ShowActionHandler<any>){
-    this.registeredActionsMap[action.getName()] = action
+    this.registeredActionHandlerMap[action.getName()] = action
   }
+  
+  getRegisteredHandlers(name:string[]):ShowActionHandler<any>[]{  
+    const handlers:ShowActionHandler<any>[] = []
+    for(const p in name){
+      const handlerName = name[p]
+      const handler = this.getRegisteredHandler( handlerName )
+      if(handler){
+        handlers.push(handler)
+      }
+    }
+    return handlers
+  }
+
   getRegisteredHandler(name:string):ShowActionHandler<any>{  
-    return this.registeredActionsMap[name]
+    return this.registeredActionHandlerMap[name]
+  }
+  processAction(action:string,handler:ShowActionHandler<any>){
+    if(handler && !handler.matches){
+      log("does not have matches fn ",handler.matches) 
+    }
+
+    if(handler && handler.matches(action,this)){
+      this.executeHandler(action, handler)
+      return true
+    }
+    return false
+  }
+  processActions(actions:string[],handlers:ShowActionHandler<any>| ShowActionHandler<any>[]){
+    
+    for(const a in actions){
+      const action = actions[a]
+      for(const p in handlers){
+        const handler = handlers[p]
+        
+        //const matched = 
+        this.processAction(action,handler)  
+      }
+    }
   }
   runAction(action: string) {
     log("running action",action)
@@ -121,30 +163,24 @@ export class ShowActionManager{
 
     if(overloaded) return //exit now
 
-    const matchedAction = this.registeredActionsMap[action]
+    const matchedHandler = this.registeredActionHandlerMap[action]
 
-    const handlesApplied:ShowActionHandler<any>[] = []
+    //const handlesApplied:ShowActionHandler<any>[] = []
    
     
-      if(matchedAction && matchedAction.matches(action,this)){
-        //exact match
+      if(matchedHandler && matchedHandler.matches && matchedHandler.matches(action,this)){
         log("execute calling for ",action)
-        this.executeHandler(action, matchedAction)
-        handlesApplied.push(matchedAction)
+        //exact match
+        this.processAction(action,matchedHandler)
       }else{
         //loop and try searching
         mainLoop:
-        for(const p in this.registeredActionsMap){
-          const handler = this.registeredActionsMap[p]
+        for(const p in this.registeredActionHandlerMap){
+          const handler = this.registeredActionHandlerMap[p]
 
-          if(handler && !handler.matches){
-            log("does not have matches ",matchedAction.matches) 
-          }
-
-          if(handler && handler.matches(action,this)){
-            this.executeHandler(action, handler)
-
-            handlesApplied.push(handler)
+          const matched:boolean = this.processAction(action,handler)
+          if(matched){
+            //handlesApplied.push(handler)
             //if(handler.isLast()) break mainLoop
             break mainLoop
           }

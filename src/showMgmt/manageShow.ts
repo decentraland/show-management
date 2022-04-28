@@ -1,6 +1,6 @@
 import { NodeCue } from '@dcl/subtitle-helper'
 import { isPreviewMode } from '@decentraland/EnvironmentAPI'
-import { SubtitleCueEvent, SubtitleSystem } from '../subtitle/SubtitleSystem'
+import { IndexedNodeCue, SubtitleCueEvent, SubtitleSystem } from '../subtitle/SubtitleSystem'
 /*
 import {
   hideArtistName,
@@ -11,6 +11,7 @@ import {
 */
 //import { videoMat } from '../videoScreens'
 import { ShowActionManager } from './manageShowActions'
+import { DefineActionAliasActionHandler, DefineActionGroupActionHandler, DefineTargetGroupActionHandler, ShowActionHandler } from './showActionHandlers'
 import { ShowSchedule } from './showSchedule'
 import { PlayShowEvent, ShowType, StopShowEvent } from './types'
 import { VideoSystem } from './VideoSystem'
@@ -160,17 +161,20 @@ export class ShowManager{
         }catch(e){ 
           //DO not let this error bubble up, or state will be lost and all listeners wont get notified
           //it will cause them to be retried over and over.  maybe we want this at some point but not right now
-          log("WARNING ManageShow processOnCueBegin listener failed. Catching so others can complete",event,cue)
+          log("WARNING ManageShow processOnCueBegin listener failed. Catching so others can complete",event,cue,e)
         }
       }
     )
   }
-
-  processOnCueBegin(cue: NodeCue) {
+  parseCue(cue:NodeCue):string[]{
     let actionNames = [cue.data.text]
     if (cue.data.text && cue.data.text.indexOf("\n")) {
       actionNames = cue.data.text.split("\n")
     }
+    return actionNames
+  }
+  processOnCueBegin(cue: NodeCue) {
+    let actionNames = this.parseCue(cue)
     log(`Show subtitle  '${cue.data.text}' (${actionNames.length}) at time: ${cue.data.start}`)
 
     //BREAK LINE AND SEND MULTIPLE
@@ -179,11 +183,44 @@ export class ShowManager{
       this.runAction(actionNames[p].trim())
     }
   }
+  processExpiredCues(offsetSeconds:number){
+    const offsetMS = (offsetSeconds) * 1000
+    // Filter by cues with time window in 'newOffset'
+    const pastCues = this.subtitleSystem.cueList.filter(
+      ($) => offsetMS > $.data.end
+    )
+    log("processExpiredCues found these pastCues that expired",pastCues)
+ 
+    //FIXME THIS is greedy,maybe have the handler describe itself for a more dynamic lookup
+    //find handlers that define things as we need these definitions still
+    const handlerNamesToProcessExpired:string[]
+      = [DefineActionGroupActionHandler.DEFAULT_NAME,DefineTargetGroupActionHandler.DEFAULT_NAME,DefineActionAliasActionHandler.DEFAULT_NAME]
+      const handlers:ShowActionHandler<any>[] = this.actionMgr.getRegisteredHandlers( handlerNamesToProcessExpired )
 
+    
+    //this.actionMgr.processExpiredCues( pastCues )
+    
+    let allActionNames:string[] = [] 
+ 
+    for(const p in pastCues){
+      const cue:IndexedNodeCue = pastCues[p]
+      let actionNames = this.parseCue(cue)
+      
+      //TODO need to figure out how to compute backwards offsets to allow partial,offset playing???
+      for (const p in actionNames) {
+        allActionNames.push( actionNames[p] )
+      }
+    }
+
+    this.actionMgr.processActions(allActionNames,handlers)
+
+  }
   playVideo(showData: ShowType, offsetSeconds: number) {
     log('playVideo show ', showData)
 
     this.stopShow()
+
+    offsetSeconds += 5
 
     this.currentlyPlaying = showData
 
@@ -194,20 +231,28 @@ export class ShowManager{
 
     // main video
     //videoMat.texture = myVideoTexture
-
+ 
     this.subtitleSystem = new SubtitleSystem()
     this.subtitleSystem.setSubtitlesString(showData.subs)
     this.registerListenerToSubtitle(this.subtitleSystem)
      //this.videoSystem will seek for it
     //this.subtitleSystem.setOffset(offsetSeconds * 1000)
 
+    //prescan for errors / load define definitions
+    this.processExpiredCues( offsetSeconds )
 
+    //offsetSeconds += 5 
+    let firstTimePlaying = true
     const onPlaySeek = new VideoChangeStatusListener((oldStatus: VideoStatus, newStatus: VideoStatus)=>{
        log("VideoChangeStatusListener.onPlaySeek fire",newStatus)
-      switch(newStatus){
-        case VideoStatus.PLAYING:       
-          //log("SEEKING!!!!",offsetSeconds,this.currentlyPlaying)     
-          this.videoSystem.seek(offsetSeconds)
+      switch(newStatus){ 
+        case VideoStatus.PLAYING:        
+          log("SEEKING!!!!",offsetSeconds,this.currentlyPlaying)    
+          if(firstTimePlaying){ 
+            firstTimePlaying = false
+            this.videoSystem.setOffsetSeekVideo(offsetSeconds)  
+          }  
+           
           onPlaySeek.enabled = false
  
           this.removeVideoStatusChangeListener(onPlaySeek)
@@ -219,7 +264,8 @@ export class ShowManager{
 
     this.videoSystem = new CustomVideoSystem(myVideoTexture,this.subtitleSystem)
     engine.addSystem(this.videoSystem)
-    engine.addSystem(this.subtitleSystem)
+    //do not add this.subtitleSystem to engine as videoSystem will manage it
+    //engine.addSystem(this.subtitleSystem)
 
        
     this.videoSystem.changeStatusListeners.push( 
@@ -231,9 +277,9 @@ export class ShowManager{
       }
      ))
 
-
+ 
        
-    //FIXME does not work maybe must be playing first?
+    //FIXME does not work maybe must be playing first?  
     //myVideoTexture.seekTime(offsetSeconds)
     myVideoTexture.playing = true
 
@@ -296,7 +342,7 @@ export class ShowManager{
 const canvas = new UICanvas()
 
 let debuggerUI_timeLapse=0
-let debuggerUI_checkIntervalSeconds=.3
+let debuggerUI_checkIntervalSeconds=.1
 
 const videoTime = new UIText(canvas)
 videoTime.visible=false
@@ -325,25 +371,46 @@ export class VideoChangeStatusListener{
   }
   
   update(oldStatus: VideoStatus, newStatus: VideoStatus){
-    if(!this.enabled) return
+    if(!this.enabled) return 
     this.callback(oldStatus,newStatus)
     OnPointerDown
-  }
+  } 
 }
-
+ 
 export class CustomVideoSystem extends VideoSystem {
   subtitleSystem:SubtitleSystem
   changeStatusListeners:VideoChangeStatusListener[] = []
   constructor(_videoTexture: VideoTexture,subtitleSystem?:SubtitleSystem) {
     super(_videoTexture)
     this.subtitleSystem = subtitleSystem
-    debuggerUI_timeLapse=0
+    debuggerUI_timeLapse=0 
+  
+  }
+  setOffset(offsetSeconds:number){
+    //log("SEEK_CHANGEg","ADD",offsetSeconds,"to",this.estimatedOffset,"=",this.estimatedOffset+offsetSeconds)
+    super.setOffset(offsetSeconds) 
+    //this.subtitleSystem.seekTime(0) 
+    this.subtitleSystem.setOffset( this.estimatedOffset * 1000 )     
+  }
+  setOffsetSeekVideo(offsetSeconds:number){
+    //if(offsetSeconds > 1){
+      this.setOffset(offsetSeconds)
+      this.videoTexture.seekTime(offsetSeconds)
+      
+    //}else{     
+    //  log("seek time too small, ignoreing",offsetSeconds)
+    //}  
   } 
   seek(offsetSeconds:number){
-    this.estimatedOffset += offsetSeconds
-    this.onOffsetUpdate(this.estimatedOffset) 
-    this.videoTexture.seekTime(offsetSeconds)
-    this.subtitleSystem.seekTime( offsetSeconds )
+    //if(offsetSeconds > 1){ 
+      //log("SEEK_CHANGEg","ADD",offsetSeconds,"to",this.estimatedOffset,"=",this.estimatedOffset+offsetSeconds)
+      this.estimatedOffset += offsetSeconds
+      this.onOffsetUpdate(this.estimatedOffset) 
+      this.videoTexture.seekTime(offsetSeconds)
+      this.subtitleSystem.seekTime( offsetSeconds ) 
+    //}else{  
+    //  log("seek time too small, ignoreing",offsetSeconds)
+    //}  
   }
   //TODO consider subscription model
   onChangeStatus(oldStatus: VideoStatus, newStatus: VideoStatus) {
@@ -373,16 +440,17 @@ export class CustomVideoSystem extends VideoSystem {
 
   update(dt: number): void {
     super.update(dt)
-  }
+    this.subtitleSystem.update(dt)
+  } 
  
   onOffsetUpdate(estimatedOffset: number) {
-    //log('SEEK offset changed ', estimatedOffset) 
+    //log('SEEK onOffsetUpdate ', estimatedOffset) 
     
     if((estimatedOffset-debuggerUI_timeLapse) > debuggerUI_checkIntervalSeconds){
       debuggerUI_timeLapse = estimatedOffset
       
       if(videoTime.visible){
-        videoTime.value = estimatedOffset.toFixed(2) +'/' + this.elapsedTime.toFixed(2)
+        videoTime.value = estimatedOffset.toFixed(2) +'/' + this.elapsedTime.toFixed(2) + '/' + (this.subtitleSystem.offsetMs/1000).toFixed(2) 
       }
     }
     // mySubtitleSystem.setOffset(estimatedOffset)

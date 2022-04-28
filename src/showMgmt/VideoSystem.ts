@@ -13,6 +13,8 @@ export class VideoSystem implements ISystem {
   lastVideoEventData: IEvents['videoEvent'] = DefaultVideoEvent
   estimatedOffset: number
   
+  lastEventTime:number
+  resumePlayAdjusted:boolean=true
 
   constructor(_videoTexture: VideoTexture) {
     this.videoTexture = _videoTexture
@@ -22,17 +24,31 @@ export class VideoSystem implements ISystem {
 
     onVideoEvent.add((data) => {
       if (data.videoClipId == this.videoTexture.videoClipId) {
-        this.updateEvent(data)
+        this.updateEvent(data) 
       }
-    })
+    }) 
+  }   
+  
+  setOffset(offsetSeconds:number){
+    //log("SEEK_CHANGEg","ADD",offsetSeconds,"to",this.estimatedOffset,"=",this.estimatedOffset+offsetSeconds)
+    this.estimatedOffset = offsetSeconds
+    this.onOffsetUpdate(this.estimatedOffset)  
   }
 
-  update(dt: number) {
-    this.elapsedTime += dt
+  update(dt: number) { 
+    this.elapsedTime += dt 
     if (this.lastVideoEventData.videoStatus === VideoStatus.PLAYING) {
-      this.estimatedOffset += dt
+      if(this.resumePlayAdjusted == false){
+        this.resumePlayAdjusted = true
+        const now = Date.now()
+        //log("adjustment dt " + dt,this.lastEventTime,now - this.lastEventTime)
+        this.estimatedOffset += dt  - ((now - this.lastEventTime)/1000)
+      }else{
+        this.estimatedOffset += dt
+      }
+      
       this.onOffsetUpdate(this.estimatedOffset)
-       //log('Playing video - currentOffset: ', this.estimatedOffset)
+       //log('Playing video - currentOffset: ', this.estimatedOffset) 
     }
   }
 
@@ -50,23 +66,29 @@ export class VideoSystem implements ISystem {
   protected onOffsetUpdate(estimatedOffset: Number) {}
 
   private updateEvent(event: IEvents['videoEvent']) {
-    // log('VideoEvent in VideoSystem:', event)
-    if (this.lastVideoEventTick != 0.0) {
+    //log('VideoEvent in VideoSystem:', event)
+    if (this.lastVideoEventTick != 0.0) {  
       if (
         this.lastVideoEventData.videoStatus === undefined ||
         this.lastVideoEventData.videoStatus !== event.videoStatus
       ) {
         if (event.videoStatus === VideoStatus.PLAYING) {
-          this.estimatedOffset = event.currentOffset
-        }
+          
+          /*if(event.currentOffset < this.estimatedOffset){
+            log("too fast adjust",event.currentOffset, this.estimatedOffset)  
+          }*/
+          //this.estimatedOffset = event.currentOffset
+          this.setOffset(event.currentOffset)
+          this.resumePlayAdjusted=false
+        } 
 
         this.onChangeStatus(
           this.lastVideoEventData.videoStatus || VideoStatus.NONE,
           event.videoStatus as VideoStatus
-        )
+        ) 
       }
     }
-
+    this.lastEventTime = Date.now()
     this.lastVideoEventData = event
     this.lastVideoEventTick = this.elapsedTime
   }

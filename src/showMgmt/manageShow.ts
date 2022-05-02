@@ -37,7 +37,7 @@ export class ShowManager{
   nextToPlay: ShowType | null
   
   actionMgr:ShowActionManager
-  videoSystem: CustomVideoSystem
+  videoSystem: SubtitleVideoSystem
   subtitleSystem: SubtitleSystem
   //showData:ShowDataType
 
@@ -56,7 +56,15 @@ export class ShowManager{
     this.showSchedule = new ShowSchedule() 
   }
  
-  
+  pause(){
+    this.videoSystem.pause()
+    this.runAction(ShowPauseAllActionHandler.DEFAULT_NAME)
+  }
+  play(){
+    this.videoSystem.play()
+
+    //this.runAction(ShowPauseAllActionHandler.RESUME)
+  }
   isCurrentlyPlaying(showData:ShowType){
     const retVal = this.currentlyPlaying && this.currentlyPlaying.id === showData.id
     log("currentlyPlaying",retVal,showData,this.currentlyPlaying) 
@@ -268,7 +276,7 @@ export class ShowManager{
     })
     this.addVideoStatusChangeListener( onPlaySeek )
 
-    this.videoSystem = new CustomVideoSystem(myVideoTexture,this.subtitleSystem)
+    this.videoSystem = new SubtitleVideoSystem(myVideoTexture,this.subtitleSystem)
     engine.addSystem(this.videoSystem)
     //do not add this.subtitleSystem to engine as videoSystem will manage it
     //engine.addSystem(this.subtitleSystem)
@@ -345,133 +353,4 @@ export class ShowManager{
   }
 }
 
-const canvas = new UICanvas()
 
-let debuggerUI_timeLapse=0
-let debuggerUI_checkIntervalSeconds=.1
-
-const videoTime = new UIText(canvas)
-videoTime.visible=false
-//videoTime.positionX = 0
-//videoTime.positionY = 0
-videoTime.hAlign = 'right'
-videoTime.vAlign = 'bottom'
- 
-const videoStatus = new UIText(canvas)
-videoStatus.visible=false
-videoStatus.positionX = -100
-//videoTime.positionY = 0
-videoStatus.hAlign = 'right'
-videoStatus.vAlign = 'bottom'
-
-isPreviewMode().then(preview=>{
-  videoTime.visible = preview
-  videoStatus.visible = preview
-})
-
-declare type VideoChangeStatusCallback = (oldStatus: VideoStatus, newStatus: VideoStatus) => void;
-export class VideoChangeStatusListener{
-  enabled:boolean = true   
-  constructor(public callback:VideoChangeStatusCallback){
-    this.callback = callback  
-  }
-  
-  update(oldStatus: VideoStatus, newStatus: VideoStatus){
-    if(!this.enabled) return 
-    this.callback(oldStatus,newStatus)
-    OnPointerDown
-  } 
-}
- 
-export class CustomVideoSystem extends VideoSystem {
-  subtitleSystem:SubtitleSystem
-  changeStatusListeners:VideoChangeStatusListener[] = []
-  constructor(_videoTexture: VideoTexture,subtitleSystem?:SubtitleSystem) {
-    super(_videoTexture)
-    this.subtitleSystem = subtitleSystem
-    debuggerUI_timeLapse=0 
-  
-  }
-  setOffset(offsetSeconds:number){
-    //log("SEEK_CHANGEg","ADD",offsetSeconds,"to",this.estimatedOffset,"=",this.estimatedOffset+offsetSeconds)
-    super.setOffset(offsetSeconds) 
-    //this.subtitleSystem.seekTime(0) 
-    this.subtitleSystem.setOffset( this.estimatedOffset * 1000 )     
-  }
-  setOffsetSeekVideo(offsetSeconds:number){
-    //if(offsetSeconds > 1){
-      this.setOffset(offsetSeconds)
-      this.videoTexture.seekTime(offsetSeconds)
-      
-    //}else{     
-    //  log("seek time too small, ignoreing",offsetSeconds)
-    //}  
-  } 
-  seek(offsetSeconds:number){
-    //if(offsetSeconds > 1){ 
-      //log("SEEK_CHANGEg","ADD",offsetSeconds,"to",this.estimatedOffset,"=",this.estimatedOffset+offsetSeconds)
-      this.estimatedOffset += offsetSeconds
-      this.onOffsetUpdate(this.estimatedOffset) 
-      this.videoTexture.seekTime(offsetSeconds)
-      this.subtitleSystem.seekTime( offsetSeconds ) 
-    //}else{  
-    //  log("seek time too small, ignoreing",offsetSeconds)
-    //}  
-  }
-  //TODO consider subscription model
-  onChangeStatus(oldStatus: VideoStatus, newStatus: VideoStatus) {
-    if (newStatus == VideoStatus.PLAYING) {
-      log(
-        `VideoTexture ${this.videoTexture.videoClipId} is now playing! Offset ${this.estimatedOffset}`
-      )
-      if (this.subtitleSystem) {
-        this.subtitleSystem.resume()
-      }
-
-      //   mySubtitleSystem.setOffset(this.estimatedOffset)
-    } else {
-      log(
-        `VideoTexture ${this.videoTexture.videoClipId} changed status to '${newStatus}'`
-      )
-      if (this.subtitleSystem) {
-        this.subtitleSystem.pause()
-      }
-    }
-
-    videoStatus.value = videoStatusAsString(newStatus)
-    for(let p in this.changeStatusListeners){
-      this.changeStatusListeners[p].update(oldStatus,newStatus)
-    }
-  } 
-
-  update(dt: number): void {
-    super.update(dt)
-    this.subtitleSystem.update(dt)
-  } 
- 
-  onOffsetUpdate(estimatedOffset: number) {
-    //log('SEEK onOffsetUpdate ', estimatedOffset) 
-    
-    if((estimatedOffset-debuggerUI_timeLapse) > debuggerUI_checkIntervalSeconds){
-      debuggerUI_timeLapse = estimatedOffset
-      
-      if(videoTime.visible){
-        videoTime.value = estimatedOffset.toFixed(2) +'/' + this.elapsedTime.toFixed(2) + '/' + (this.subtitleSystem.offsetMs/1000).toFixed(2) 
-      }
-    }
-    // mySubtitleSystem.setOffset(estimatedOffset)
-  } 
-}
-
-// instance systems
-function videoStatusAsString(status:VideoStatus){ 
-  switch(status){
-    case VideoStatus.PLAYING:  return "PLAYING" //4
-    case VideoStatus.LOADING:  return "LOADING" //2
-    case VideoStatus.BUFFERING:  return "BUFFERING" //5
-    case VideoStatus.ERROR:  return "ERROR" //1
-    case VideoStatus.READY:  return "READY" //3
-    case VideoStatus.NONE:  return "NONE" //0
-    default: return "UNKNOWN:"+status  
-  }
-}

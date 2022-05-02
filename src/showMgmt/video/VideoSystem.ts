@@ -6,6 +6,22 @@ export const DefaultVideoEvent: IEvents['videoEvent'] = {
   videoStatus: VideoStatus.NONE,
 }
 
+declare type VideoChangeStatusCallback = (oldStatus: VideoStatus, newStatus: VideoStatus) => void;
+
+
+export class VideoChangeStatusListener{
+  enabled:boolean = true   
+  constructor(public callback:VideoChangeStatusCallback){
+    this.callback = callback  
+  }
+  
+  update(oldStatus: VideoStatus, newStatus: VideoStatus){
+    if(!this.enabled) return 
+    this.callback(oldStatus,newStatus)
+    OnPointerDown
+  } 
+}
+
 export class VideoSystem implements ISystem {
   videoTexture: VideoTexture
   elapsedTime: number
@@ -15,6 +31,8 @@ export class VideoSystem implements ISystem {
   
   lastEventTime:number
   resumePlayAdjusted:boolean=true
+
+  changeStatusListeners:VideoChangeStatusListener[] = []
 
   constructor(_videoTexture: VideoTexture) {
     this.videoTexture = _videoTexture
@@ -57,7 +75,12 @@ export class VideoSystem implements ISystem {
    * @param oldStatus
    * @param newStatus
    */
-  protected onChangeStatus(oldStatus: VideoStatus, newStatus: VideoStatus) { }
+  protected onChangeStatus(oldStatus: VideoStatus, newStatus: VideoStatus) { 
+    
+    for(let p in this.changeStatusListeners){
+      this.changeStatusListeners[p].update(oldStatus,newStatus)
+    }
+  }
 
   /**
    *  Triggered every frame while the video is playing
@@ -66,7 +89,7 @@ export class VideoSystem implements ISystem {
   protected onOffsetUpdate(estimatedOffset: Number) {}
 
   private updateEvent(event: IEvents['videoEvent']) {
-    //log('VideoEvent in VideoSystem:', event)
+    log('VideoEvent in VideoSystem:', event)
     if (this.lastVideoEventTick != 0.0) {  
       if (
         this.lastVideoEventData.videoStatus === undefined ||
@@ -80,7 +103,7 @@ export class VideoSystem implements ISystem {
           //this.estimatedOffset = event.currentOffset
           this.setOffset(event.currentOffset)
           this.resumePlayAdjusted=false
-        } 
+        }  
 
         this.onChangeStatus(
           this.lastVideoEventData.videoStatus || VideoStatus.NONE,
@@ -88,6 +111,12 @@ export class VideoSystem implements ISystem {
         ) 
       }
     }
+    //if (event.videoStatus === VideoStatus.PLAYING) {
+          
+      //if(event.currentOffset < this.estimatedOffset){
+        //log("too fast measure drift",event.currentOffset, this.estimatedOffset,this.elapsedTime, (event.currentOffset - this.estimatedOffset))  
+      //}
+    //}  
     this.lastEventTime = Date.now()
     this.lastVideoEventData = event
     this.lastVideoEventTick = this.elapsedTime

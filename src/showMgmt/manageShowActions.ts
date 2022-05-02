@@ -1,8 +1,11 @@
 import * as utils from '@dcl/ecs-scene-utils'
 import { NodeCue } from '@dcl/subtitle-helper'
 import { IndexedNodeCue } from '../subtitle/SubtitleSystem'
+import { DefineActionAliasActionHandler } from './actionHandlers/DefineActionAliasActionHandler'
+import { DefineTargetGroup, DefineTargetGroupActionHandler } from './actionHandlers/DefineTargetGroupActionHandler'
+import { ShowActionHandler } from './actionHandlers/showActionHandler'
+import { ShowBpmActionHandler } from './actionHandlers/ShowBpmActionHandler'
 import { ShowManager } from './manageShow'
-import { DefineActionAliasActionHandler, DefineTargetGroup, DefineTargetGroupActionHandler, ShowActionHandler, ShowBpmActionHandler } from './showActionHandlers'
 
 // Default beats per minute of show
 export const DEFAULT_BPM = 120

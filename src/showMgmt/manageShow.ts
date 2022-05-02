@@ -1,6 +1,11 @@
 import { NodeCue } from '@dcl/subtitle-helper'
 import { isPreviewMode } from '@decentraland/EnvironmentAPI'
 import { IndexedNodeCue, SubtitleCueEvent, SubtitleSystem } from '../subtitle/SubtitleSystem'
+import { DefineActionAliasActionHandler } from './actionHandlers/DefineActionAliasActionHandler'
+import { DefineActionGroupActionHandler } from './actionHandlers/DefineActionGroupActionHandler'
+import { DefineTargetGroupActionHandler } from './actionHandlers/DefineTargetGroupActionHandler'
+import { ShowActionHandler } from './actionHandlers/showActionHandler'
+import { ShowPauseAllActionHandler } from './actionHandlers/ShowPauseAllActionHandler'
 /*
 import {
   hideArtistName,
@@ -11,10 +16,11 @@ import {
 */
 //import { videoMat } from '../videoScreens'
 import { ShowActionManager } from './manageShowActions'
-import { DefineActionAliasActionHandler, DefineActionGroupActionHandler, DefineTargetGroupActionHandler, ShowActionHandler } from './showActionHandlers'
+import { manageShowDebugUI } from './manageShowDebugUI'
 import { ShowSchedule } from './showSchedule'
 import { PlayShowEvent, ShowType, StopShowEvent } from './types'
-import { VideoSystem } from './VideoSystem'
+import { SubtitleVideoSystem } from './video/SubtitleVideoSystem'
+import { VideoChangeStatusListener, VideoSystem } from './video/VideoSystem'
 
 let PLAYING_DEFAULT: boolean = false
 

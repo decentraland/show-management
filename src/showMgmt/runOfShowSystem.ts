@@ -1,7 +1,7 @@
 import * as utils from '@dcl/ecs-scene-utils'
 import { getUserAccount } from '@decentraland/EthereumController';
 import { ShowManager } from './manageShow';
-import { ShowType } from './types';
+import { ShowMatchRangeResult, ShowType } from './types';
 
 
 export let adminList = ["0x7a3891acf4f3b810992c4c6388f2e37357d7d3ab", "0xaabe0ecfaf9e028d63cf7ea7e772cf52d662691a", "0xd210dc1dd26751503cbf1b8c9154224707820da8"]
@@ -10,17 +10,14 @@ export let adminList = ["0x7a3891acf4f3b810992c4c6388f2e37357d7d3ab", "0xaabe0ec
 export class RunOfShow{
 
   showMgr:ShowManager
-  times:number[] = []
-  //showsSorted:ShowType[] = []
-  counter = 0
-  started = false
+  
   intermissionStarted = false
   countdownStarted = false
   lastShowIdx = 0
 
   timeLapse = 0
   checkIntervalSeconds = .1
-  lastInterval = 0//Number.MAX_VALUE
+
   //day:any
 
   constructor(showMgr:ShowManager){
@@ -28,7 +25,10 @@ export class RunOfShow{
       this.showMgr = showMgr
       //this.showsSorted = this.showMgr.showSchedule.shows//showData.shows.sort((a, b) => (a.startTime < b.startTime) ? -1 : 1);
   }
-
+  reset(){
+    this.lastShowIdx = 0
+    this.timeLapse = 0
+  }
   update(dt:number){
     
     this.timeLapse += dt
@@ -45,81 +45,58 @@ export class RunOfShow{
     //IF NEAREST NOT ST
     //
 
-    let closestNotStartedShow:ShowType 
-    let runningShow:ShowType
+    const date = new Date()
+    
+    const showMatch = this.showMgr.showSchedule.findShowToPlayByDate( date,this.lastShowIdx )
 
-    const showsSorted = this.showMgr.showSchedule.shows
-    if(showsSorted.length > 0){
-      //this.day = this.days[0]
-      //log(this.day)
-
-      //for(const p in this.showMgr.showData.shows){
-      for( let p = this.lastShowIdx ; p< showsSorted.length; p++){
-        const showData = showsSorted[p]
-        let start = showData.startTime
-        let now = Math.floor(Date.now()/1000)
-
-        if(showData.startTime < 0){
-          log("invalid start time, next show",showData)
-          this.lastShowIdx ++
-          continue
-        } 
-        
-        if(now >= showData.startTime + showData.length){
-          log('we went past show, load another',now,(showData.startTime + showData.length),showData)
-          this.lastShowIdx ++
-        }else{
-          if(now >= showData.startTime){
-            if(runningShow === undefined){
-              //log("adding starting show ",showData," vs ",runningShow)
-              runningShow = showData
-            }else if(runningShow.startTime - showData.startTime < 0 ){ //closer to start time
-              //log("found closer starting show ",showData," vs ",runningShow)
-              runningShow = showData
-            }
-          } else{
-            if(closestNotStartedShow === undefined){
-              //log("adding closer show ",showData," vs ",closestNotStartedShow)
-              closestNotStartedShow = showData
-            }else if(closestNotStartedShow.startTime - showData.startTime < 0 ){ //current is closer
-              //log("found closer show ",showData," vs ",closestNotStartedShow)
-              closestNotStartedShow = showData
-            }
-          }
-        }
-      }
+    if(showMatch && showMatch.lastShow){
+      //update index for faster checking
+      this.lastShowIdx = showMatch.lastShow.index
     }
 
-    if(runningShow !== undefined){
+    this.processShow(showMatch)
+    
+  }
+  processShow(showMatch:ShowMatchRangeResult){
+    if(!showMatch){
+      return
+    }
+    if(showMatch.currentShow){
       ///this.started = true
       //this.intermissionStarted = false
       //this.countdownStarted = false
 
-      if((!this.showMgr.currentlyPlaying) || runningShow.id !== this.showMgr.currentlyPlaying.id){
-        log('starting show', runningShow,closestNotStartedShow)
-        this.showMgr.startShow(runningShow)
+      if((!this.showMgr.currentlyPlaying) || showMatch.currentShow.show.id !== this.showMgr.currentlyPlaying.id){
+        log('starting show', showMatch)
+        this.showMgr.startShow(showMatch.currentShow.show)
       }else{
-        // log('already running show', runningShow,closestNotStartedShow)
+        //log('already running show', showMatch)
       }
     }else{
-      if(closestNotStartedShow !== undefined){
-        log('waiting till show start',runningShow,closestNotStartedShow)
+      if(showMatch.nextShow){
+        log('waiting till show start',showMatch)
           //this.intermissionStarted = true
-          this.showMgr.playDefaultVideo()
+          this.onNoShowToPlay(showMatch)
       }
 
       //this.showMgr.startCountdown(closestNotStartedShow.startTime)
       
     }
     
-    if(runningShow === undefined && closestNotStartedShow === undefined){
-      log("no more days, stop system")
-      engine.removeSystem(this)
-      if(!this.intermissionStarted){
-        this.intermissionStarted = true
-        this.showMgr.playDefaultVideo()
-      }
+    if(showMatch === undefined || showMatch.currentShow === undefined && showMatch.nextShow === undefined){
+      this.onOutOfShowsToPlay()
     }
-    
+  }
+  onNoShowToPlay(showMatch:ShowMatchRangeResult){
+    this.showMgr.playDefaultVideo()
+  }
+
+  onOutOfShowsToPlay(){
+    log("no more days, stop system")
+    engine.removeSystem(this)
+    if(!this.intermissionStarted){
+      this.intermissionStarted = true
+      this.showMgr.playDefaultVideo()
+    }
   }
 }

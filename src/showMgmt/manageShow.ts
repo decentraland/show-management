@@ -94,6 +94,12 @@ export class ShowManager{
     let startTime = showData.startTime
     let timeDiff = currentTime - startTime
 
+    //of start time is negative its not a schedule play song 
+    if(showData.startTime < 0){
+      log("startShow.startShow was negative, dont calculate timeDiff")
+      timeDiff = 0
+    }
+
     log(
       'show started for ',
       showData.id,
@@ -102,6 +108,7 @@ export class ShowManager{
       ' seconds ago, show playing: ',
       showData
     )
+    
 
     log(
       'CURRENT TIME: ',
@@ -112,7 +119,6 @@ export class ShowManager{
       timeDiff
     )
 
-    
     if (timeDiff >= showData.length * 60) {
       if(startTime < 0){//if negative start time its can be played on demand
         log('starting show anyways, ', timeDiff, ' seconds late')

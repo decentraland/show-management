@@ -35,6 +35,7 @@ export type PlayShowEvent={
 export type ShowResultType={
   show:ShowType
   offset: number
+  index: number
 }
 
 export type ShowMatchRangeResult = {

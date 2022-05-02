@@ -59,7 +59,8 @@ export class ShowSchedule{
     return showMatch
   }
 
-  findShowToPlayByDate(date:Date):ShowMatchRangeResult{
+  findShowToPlayByDate(date:Date,startIndex?:number):ShowMatchRangeResult{
+    //log("findShowToPlayByDate",date.getTime(),startIndex)
     const showMatch:ShowMatchRangeResult = {}
 
     const unixTime = date.getTime()/1000
@@ -72,57 +73,62 @@ export class ShowSchedule{
 
     //debugger
     
-    let nearestShowToNow
+    let nearestShowToNow:ShowType
     let nearestShowIndex = 0
     let nearestShowToNowDiff=Number.MAX_VALUE
 
     //debugger
-    for (let show of sortedShows) {
+    let start = startIndex !== undefined ? startIndex : 0
+    let index = 0
+    //for (let show of sortedShows) {
+    mainLoop:
+    for( let index = start ; index < sortedShows.length; index++){
+      const show = sortedShows[index]
+      
+      var showDiff = show.startTime - unixTime
+      if(show.startTime > 0 && showDiff < nearestShowToNowDiff){
+        nearestShowToNow = show
+        nearestShowIndex = index
+        nearestShowToNowDiff = showDiff
+      }
+
       if (    
         show.startTime > 0
         && show.startTime < unixTime 
         && show.startTime + show.length > unixTime
       ) {
         showPlaying = show
-        showPlayingIndex = counter
-        break;
+        showPlayingIndex = index
+        break mainLoop;
       } 
       
-      var showDiff = show.startTime - unixTime
-      if(show.startTime > 0 && showDiff < nearestShowToNowDiff){
-        nearestShowToNow = show
-        nearestShowIndex = counter
-        nearestShowToNowDiff = showDiff
-      }
-
-      counter++
     }
 
     if(showPlaying !== undefined){
-      showMatch.currentShow = {show:showPlaying,offset:-1}
+      showMatch.currentShow = {show:showPlaying,offset:-1,index:showPlayingIndex}
       showMatch.currentShow.offset = unixTime - showPlaying.startTime
       
       if( showPlayingIndex - 1 > 0 ){
-        showMatch.lastShow = {show:sortedShows[showPlayingIndex -1],offset:-1}
+        showMatch.lastShow = {show:sortedShows[showPlayingIndex -1],offset:-1,index:showPlayingIndex-1}
         showMatch.lastShow.offset = unixTime - showMatch.lastShow.show.startTime
       }
       if( showPlayingIndex + 1 < sortedShows.length ){
-        showMatch.nextShow = {show:sortedShows[showPlayingIndex +1],offset:-1}
+        showMatch.nextShow = {show:sortedShows[showPlayingIndex +1],offset:-1,index:showPlayingIndex+1}
         
       }
     }else{
       if(nearestShowToNow.startTime < unixTime){
         //in past
-        showMatch.lastShow = {show:sortedShows[nearestShowIndex],offset:-1}
+        showMatch.lastShow = {show:sortedShows[nearestShowIndex],offset:-1,index:nearestShowIndex}
         showMatch.lastShow.offset = unixTime - showMatch.lastShow.show.startTime
 
         if( nearestShowIndex + 1 < sortedShows.length ){
-          showMatch.nextShow = {show:sortedShows[nearestShowIndex +1],offset:-1}
+          showMatch.nextShow = {show:sortedShows[nearestShowIndex +1],offset:-1,index:nearestShowIndex+1}
         }
       }else{
         //in future
-        showMatch.nextShow = {show:nearestShowToNow,offset:-1}
-      
+        showMatch.nextShow = {show:nearestShowToNow,offset:-1,index:nearestShowIndex}
+    
       }
     }
 

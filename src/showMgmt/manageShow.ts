@@ -240,6 +240,7 @@ export class ShowManager{
 
     const myVideoClip = new VideoClip(showData.link)
     const myVideoTexture = new VideoTexture(myVideoClip)
+    if(showData.loop !== undefined) myVideoTexture.loop = showData.loop
 
     //hideBoard()
 

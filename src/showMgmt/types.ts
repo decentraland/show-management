@@ -11,6 +11,7 @@ export type ShowType = {
   startTime?: number
   length?: number
   artist: string
+  loop?: boolean
 }
 
 export type ShowTypePlayListType = {

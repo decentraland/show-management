@@ -110,7 +110,7 @@ export class ShowHUD {
 
         this.isSetup = true
         // load the image atlas
-        let imageAtlas = "src/modules/showMgmt/showhud/builderhud.png"
+        let imageAtlas = "https://github.com/wacaine/show-mgmt-dcl/blob/master/images/builderhud.png" //"src/showMgmt/showhud/builderhud.png"
         let imageTexture = new Texture(imageAtlas)
 
         // Create canvas component

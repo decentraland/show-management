@@ -1,5 +1,6 @@
 import { ShowActionManager } from "../manageShowActions"
-import { ActionParams, ShowActionSupportArgs, ShowBasicActionHandler } from "./showActionHandler"
+import { ActionParams, ShowActionSupportArgs } from "./showActionHandler"
+import { ShowBasicActionHandler } from "./ShowBasicActionHandler"
 import { actionStartsWith } from "./utils"
 
 export class ShowPauseAllActionHandler extends ShowBasicActionHandler{

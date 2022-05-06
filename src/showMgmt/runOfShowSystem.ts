@@ -1,5 +1,4 @@
-import * as utils from '@dcl/ecs-scene-utils'
-import { getUserAccount } from '@decentraland/EthereumController';
+
 import { ShowManager } from './manageShow';
 import { ShowMatchRangeResult, ShowType } from './types';
 

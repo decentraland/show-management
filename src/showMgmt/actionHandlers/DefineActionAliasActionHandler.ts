@@ -4,8 +4,9 @@
 
 import { ShowActionManager } from "../manageShowActions"
 import { DefineActionParams } from "./DefineActionParams"
-import { ActionParams, ShowActionSupportArgs, ShowBasicActionHandler } from "./showActionHandler"
+import { ActionParams, ShowActionSupportArgs } from "./showActionHandler"
 import { ShowActionHandlerSupport } from "./ShowActionHandlerSupport"
+import { ShowBasicActionHandler } from "./ShowBasicActionHandler"
 import { actionStartsWith, splitByWhiteSpace } from "./utils"
 
 

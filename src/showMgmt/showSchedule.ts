@@ -1,7 +1,6 @@
 import { ShowDataType, ShowMatchRangeResult, ShowType } from './types'
 import { fetchWorldTime } from './utils'
 
-let PLAYING_DEFAULT: boolean = false
 
 
 //export let currentlyPlaying: number | null

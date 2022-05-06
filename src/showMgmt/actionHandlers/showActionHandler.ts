@@ -1,13 +1,18 @@
-import * as utils from '@dcl/ecs-scene-utils'
 import { ShowActionManager } from '../manageShowActions'
-import { ShowActionHandlerSupport } from './ShowActionHandlerSupport'
-import { actionStartsWith, parseActionWithOpts } from './utils'
 
 /*
 @Component("dcl.show.action.handler")
 export class ShowActionMember{
   enabled:boolean
 }*/
+
+
+export type OnProcessListener<T>=(action: T,showActionMgr:ShowActionManager)=>void
+
+export type ActionParams<T>={
+  array?:string[]
+  params?:T
+}
 
 export interface ShowActionHandler<T>{
   //name:string
@@ -30,7 +35,6 @@ export interface ShowActionHandler<T>{
   decodeAction(action:string,showActionMgr:ShowActionManager):ActionParams<T>
 }
 
-
 export type ShowActionSupportArgs<T>= {
   matches?(action: string,showActionMgr:ShowActionManager):boolean,
   name?:string
@@ -38,20 +42,3 @@ export type ShowActionSupportArgs<T>= {
   decodeAction?(action: string,showActionMgr:ShowActionManager):ActionParams<T>
 }
 
-export type OnProcessListener<T>=(action: T,showActionMgr:ShowActionManager)=>void
-
-
-export class ShowBasicActionHandler extends ShowActionHandlerSupport<string>{
-  constructor(name:string, args:ShowActionSupportArgs<string>){
-    super(name, args)
-  }
-  matches(action: string, showActionMgr: ShowActionManager): boolean{
-    return action == this.name
-  }
-}
-
-
-export type ActionParams<T>={
-  array?:string[]
-  params?:T
-}

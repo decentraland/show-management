@@ -6,7 +6,7 @@ export const DefaultVideoEvent: IEvents['videoEvent'] = {
   videoStatus: VideoStatus.NONE,
 }
 
-declare type VideoChangeStatusCallback = (oldStatus: VideoStatus, newStatus: VideoStatus) => void;
+export declare type VideoChangeStatusCallback = (oldStatus: VideoStatus, newStatus: VideoStatus) => void;
 
 
 export class VideoChangeStatusListener{

@@ -2,7 +2,7 @@ export * from './showMgmt/types'
 export {ShowManager} from './showMgmt/manageShow'
 export {
     FindEntityResult,ShowActionManager} from './showMgmt/manageShowActions'
-export {RunOfShow} from './showMgmt/runOfShowSystem'
+export {RunOfShowSystem} from './showMgmt/runOfShowSystem'
 export { ShowActionHandler,ShowActionSupportArgs,ActionParams } from './showMgmt/actionHandlers/showActionHandler'
 
 export { DefineActionAliasActionHandler } from './showMgmt/actionHandlers/DefineActionAliasActionHandler'

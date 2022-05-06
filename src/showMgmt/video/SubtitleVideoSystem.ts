@@ -1,4 +1,4 @@
-import { SubtitleSystem } from "src/subtitle/SubtitleSystem";
+import { SubtitleSystem } from "src/modules/subtitle/SubtitleSystem";
 import { manageShowDebugUI } from "../manageShowDebugUI";
 import { VideoSystem } from "./VideoSystem";
 
@@ -66,7 +66,7 @@ export class SubtitleVideoSystem extends VideoSystem {
       }
     }
 
-    if(manageShowDebugUI.enabled) manageShowDebugUI.videoStatus.value = videoStatusAsString(newStatus)
+    if(manageShowDebugUI.enabled) manageShowDebugUI.setVideoStatus( videoStatusAsString(newStatus) )
     
     super.onChangeStatus(oldStatus,newStatus)
   } 
@@ -83,7 +83,7 @@ export class SubtitleVideoSystem extends VideoSystem {
   onOffsetUpdate(estimatedOffset: number) {
     //log('SEEK onOffsetUpdate ', estimatedOffset) 
     if(manageShowDebugUI.enabled){
-      manageShowDebugUI.videoTimeValue = estimatedOffset.toFixed(2) +'/' + this.elapsedTime.toFixed(2) + '/' + (this.subtitleSystem.offsetMs/1000).toFixed(2) 
+      manageShowDebugUI.updateVideoTimeValue( estimatedOffset , this.elapsedTime , this.subtitleSystem.offsetMs )
     }
     // mySubtitleSystem.setOffset(estimatedOffset)
   } 

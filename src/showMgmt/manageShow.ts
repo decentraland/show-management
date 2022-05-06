@@ -240,6 +240,9 @@ export class ShowManager{
 
     this.stopShow()
 
+    if(manageShowDebugUI.enabled){
+      manageShowDebugUI.updateDisplayNameValue( showData.artist )
+    }
     //offsetSeconds += 5
 
     this.currentlyPlaying = showData

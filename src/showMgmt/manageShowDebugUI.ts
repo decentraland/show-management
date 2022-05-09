@@ -9,9 +9,6 @@ import { ShowDataType, ShowResultType } from './types'
 
 const canvas = new UICanvas()
 
-let debuggerUI_timeLapse=0
-let debuggerUI_checkIntervalSeconds=.1
-
 export class ManageShowDebugUI{
   
   private static instance:ManageShowDebugUI
@@ -96,8 +93,8 @@ export class ManageShowDebugUI{
   resetCounters(){
     this.UI_timeLapse = 0
     this.actionMgrProcessed = 0
-    this.actionMgrSkipped = 0
     this.actionMgrErrors = 0
+    this.actionMgrWarnings = 0
   }
   setEnabled(val:boolean){
     this.enabled = val

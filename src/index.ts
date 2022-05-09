@@ -25,3 +25,6 @@ export {fetchWorldTime} from './showMgmt/utils'
 export {VideoChangeStatusCallback,VideoSystem,DefaultVideoEvent,VideoChangeStatusListener}from './showMgmt/video/VideoSystem'
 
 export {registerWithDebugUI,manageShowDebugUI} from './showMgmt/manageShowDebugUI'
+
+export {SyncedEntityModelExtConstructorArgs,ShowEntity,ShowEntitySupport} from './showMgmt/showEntity/showEntity'
+export {ShowEntityModel} from './showMgmt/showEntity/showEntityModel'

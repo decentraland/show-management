@@ -32,43 +32,197 @@ To use any of the helpers provided by this library:
 
 ## Usage
 
-### < use case 1 >
 
-To do `< insert use case >`, add the `MyAmazingComponent` component to the entity.
+### Show Manager 
 
-MyAmazingComponent requires two arguments when being constructed:
-
-- `start`: Vector3 for the start position
-- `duration`: duration (in seconds)
-
-MyAmazingComponent can optionally also take the following argument:
-
-- `color`: Color4 value for the color. If not provided, the default value is `Color4.Red()`
-
-This example uses MyAmazingComponent to do `< insert use case >` to an entity over a period of 2 seconds:
+You will need need to create a ShowManager instance to start and assign it a schedule
 
 ```ts
-import * as magic from 'myAmazingLibrary'
+import * as showMgmt from 'show-mgmt-dcl'
 
-// Create entity
-const box = new Entity()
+const showData: showMgmt.ShowDataType = ...
 
-// Give entity a shape and transform
-box.addComponent(new BoxShape())
-box.addComponent(new Transform())
+export const SHOW_MGR = new showMgmt.ShowManager()
 
-// Move entity
-box.addComponent(new magic.MyAmazingComponent(new Vector3(1, 1, 1), 2))
+SHOW_MGR.showSchedule.setData( showData )
 
-// Add entity to engine
-engine.addEntity(box)
 ```
 
-> Note: Be aware that if < other use case >, MyAmazingComponent will < do some other thing >.
+### Configure Shows
 
-### < use case 2 >
+You must create showData that will define what shows to play and when. 
 
-...
+####
+
+```ts
+const defaultShow:ShowType = {
+  id: -1, //
+  title: "Intermission",//the title of the show
+  artist: "Artist Name", //name of the artist
+  link: DEFAULT_VIDEO, //link to the video, can be internal or external
+  subs: IntermissionSubs, //string to a subtitle SRT format
+  startTime: -1, //UTC time in seconds for which a show will start
+  length: 17, //length of video in seconds
+  loop: true //if the video should loop when over
+}
+
+const showData: ShowDataType = {
+  defaultShow: defaultShow,
+  shows: [
+		{
+		  id: -1, //
+		  title: "Title",//the title of the show
+		  artist: "Artist Name", //name of the artist
+		  link: `videos/tunnelVisuals.mp4`, //link to the video, can be internal or external
+		  subs: MySubTitleVar, //string to a subtitle SRT format
+		  startTime: 1652117754, //UTC time in seconds for which a show will start
+		  length: 17, //length of video in seconds
+		  loop: false //if the video should loop when over
+		}
+	]
+```
+
+
+#### Configure Show Example
+
+```ts
+import * as showMgmt from 'show-mgmt-dcl'
+
+//while testing this can ensure the video start time is always 5 seconds after scene load
+const testStartTime = new Date(Date.now() + (5 *1000)).getTime() / 1000   
+
+const showData: showMgmt.ShowDataType = {
+  defaultShow: defaultShow,
+  shows: [
+		defaultShow,
+		{ 
+	    id: 1,
+	    artist: 'Demo Show',
+	    link: `videos/tunnelVisuals.mp4`,
+	    subs: DemoShowSubs,
+	    startTime: testStartTime, //start time from UTC in seconds
+	    length: 28,
+	  }
+	]
+}
+```
+
+
+
+### Run Your Show
+
+
+You will need need to create a RunOfShowSystem instance should you want the show to play by it self when the startTime dictage
+
+```ts
+import * as showMgmt from 'show-mgmt-dcl'
+
+export const runOfShow = new showMgmt.RunOfShowSystem(SHOW_MGR)
+engine.addSystem(runOfShow)
+
+```
+
+
+### Event Listeners
+
+The Show Manager has no knowlege of your scene and how it should react to the videos.  So your scene react to show events registering to the provided event listeners
+
+* addStopShowListeners
+* addPlayVideoListeners
+* addVideoStatusChangeListener
+
+```ts
+import * as showMgmt from 'show-mgmt-dcl'
+
+SHOW_MGR.addStopShowListeners( (event:showMgmt.StopShowEvent)=>{
+  log("addStopShowListeners fired",event)
+  
+  ...  
+} )
+
+ 
+SHOW_MGR.addPlayVideoListeners( (event:showMgmt.PlayShowEvent)=>{
+  log("addPlayVideoListeners fired",event)
+  
+  ...
+} )
+
+SHOW_MGR.addVideoStatusChangeListener( new showMgmt.VideoChangeStatusListener((oldStatus: VideoStatus, newStatus: VideoStatus)=>{
+  log("addVideoStatuChangeListener fired",oldStatus,newStatus)
+  
+  switch(newStatus){
+    case VideoStatus.LOADING:
+
+    break;
+    ...
+  }
+
+} ))
+
+```
+
+### Show the current video in my scene 
+
+The Show Manager will create a video texture but does not know where to put it in your scene.  You can register to SHOW_MGR.addPlayVideoListeners and assign the video texture where it needs to go.
+
+```ts
+
+export const videoMat = new Material()
+
+//create video material
+videoMat.castShadows = false
+videoMat.metallic = 0
+videoMat.roughness = 1
+videoMat.emissiveIntensity = 1
+videoMat.emissiveColor = Color3.White()
+videoMat.alphaTest = 1
+
+//create entity
+export const myScreenEntity = new Entity()
+const myScreenPlane = new PlaneShape()
+myScreenEntity.addComponent(myScreenPlane)
+
+//add material
+myScreenEntity.addComponent(videoMat)
+
+//add to engine
+engine.addEntity(myScreenEntity)
+
+SHOW_MGR.addPlayVideoListeners( (event:showMgmt.PlayShowEvent)=>{
+  log("addPlayVideoListeners fired",event)
+  
+  //assign the playing video to a material so it can be visible in scene
+  if(event.videoTexture){ 
+    videoMat.albedoTexture = event.videoTexture
+    videoMat.alphaTexture  = event.videoTexture
+    videoMat.emissiveTexture = event.videoTexture
+  }
+} )
+```
+
+### Perform a specific action for a certian show
+
+In this example I want to show a countdown to when the next show will be.  Register a listener to  addPlayVideoListeners and perform your logic there
+
+```ts
+SHOW_MGR.addPlayVideoListeners( (event:showMgmt.PlayShowEvent)=>{
+  log("addPlayVideoListeners fired",event)
+
+  //if I know the intermission show ID I can check for it and perform a very specific action
+  if(event.showData.id == -1){ 
+    const showRange = SHOW_MGR.showSchedule.findShowToPlayByDate( new Date() ) 
+    if(showRange.nextShow && showRange.nextShow.show){   
+	    startNextShowCounter(showRange.nextShow)
+    } 
+  }else{
+  	hideShowCounter()
+  }
+ 
+} )
+
+```
+
+
 
 ## Copyright info
 

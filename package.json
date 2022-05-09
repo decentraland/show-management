@@ -1,7 +1,7 @@
 {
-  "name": "show-mgmt-dcl",
+  "name": "show-manager",
   "version": "1.0.0",
-  "description": "Dcl SDK Library",
+  "description": "DCL SDK Library for managing shows and syncing events to it",
   "main": "./dist/index.js",
   "scripts": {
     "build": "rollup -c --environment BUILD:production",

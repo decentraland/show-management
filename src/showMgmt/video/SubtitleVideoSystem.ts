@@ -1,6 +1,6 @@
 
 
-import { SubtitleSystem } from "src/subtitle/SubtitleSystem";
+import { SubtitleSystem } from "../../subtitle/SubtitleSystem";
 import { ManageShowDebugUI } from "../manageShowDebugUI";
 import { VideoSystem } from "./VideoSystem";
 

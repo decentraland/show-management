@@ -7,7 +7,7 @@
   ],
   "compilerOptions": {
     "module": "ESNext",
-    "removeComments": true,
+    "removeComments": false,
     "declaration": true,
     "declarationDir": ".",
     "outDir": "dist",

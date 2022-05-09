@@ -10,7 +10,8 @@ export type ShowType = {
   subs?: string
   startTime?: number
   length?: number
-  artist: string
+  artist?: string
+  title: string
   loop?: boolean
 }
 

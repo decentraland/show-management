@@ -9,7 +9,7 @@ export { DefineActionAliasActionHandler } from './showMgmt/actionHandlers/Define
 export { DefineActionGroupActionHandler } from './showMgmt/actionHandlers/DefineActionGroupActionHandler'
 export { DefineActionParams } from './showMgmt/actionHandlers/DefineActionParams'
 
-export { DefineTargetGroupActionHandler } from './showMgmt/actionHandlers/DefineTargetGroupActionHandler'
+export { DefineTargetGroupActionHandler,DefineTargetGroup,DefineTargetGroupType } from './showMgmt/actionHandlers/DefineTargetGroupActionHandler'
 export { ShowActionHandlerSupport } from './showMgmt/actionHandlers/ShowActionHandlerSupport'
 export { ShowAnimationActionHandler,ActionHandlerAnimationParams } from './showMgmt/actionHandlers/ShowAnimationActionHandler'
 export { ShowAnounceActionHandler,ActionHandlerAnouncementParams } from './showMgmt/actionHandlers/ShowAnounceActionHandler'

@@ -4,6 +4,7 @@ import { IndexedNodeCue } from '../subtitle/SubtitleSystem'
 import { DefineActionAliasActionHandler } from './actionHandlers/DefineActionAliasActionHandler'
 import { DefineTargetGroup, DefineTargetGroupActionHandler } from './actionHandlers/DefineTargetGroupActionHandler'
 import { ShowActionHandler } from './actionHandlers/showActionHandler'
+import { ShowAnimationActionHandler } from './actionHandlers/ShowAnimationActionHandler'
 import { ShowBpmActionHandler } from './actionHandlers/ShowBpmActionHandler'
 import { ShowManager } from './manageShow'
 import { ManageShowDebugUI } from './manageShowDebugUI'
@@ -62,6 +63,8 @@ export class ShowActionManager{
     this.registerHandler(new ShowBpmActionHandler())
     this.registerHandler(new DefineTargetGroupActionHandler())
     this.registerHandler(new DefineActionAliasActionHandler())
+    this.registerHandler(new ShowAnimationActionHandler())
+    
     //this.registerHandler(new RandomizerActionHandler())
     
     //this.registerHandler(new ShowBpmActionHandler())

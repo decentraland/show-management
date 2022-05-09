@@ -40,7 +40,7 @@ export class ShowSchedule{
     }
   }
 
-  async findShowToPlayByTime():Promise<ShowMatchRangeResult> {
+  async findShowToPlayByWorldTime():Promise<ShowMatchRangeResult> {
     //log("findShowToPlayByTime")
     //if (FAKING_LOCALLY) return
   

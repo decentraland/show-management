@@ -35,6 +35,13 @@ export class ShowHUD {
     displayName:any
     videoStatus:UIText
     playTimes:UIText
+    playTimesLabel:UIText
+    noticeBox:UIText
+    
+    actionCounts:UIText
+    actionCountsLabel:UIText
+
+    noticeSystem:NoticeBoxSystem
 
     //as a property lets users change it if need be
     imageAtlas = "https://gateway.pinata.cloud/ipfs/QmYyDWc67svskJWxQrZNJxjwNsvsXyG9dvVzXvJtYtmgAr"
@@ -108,6 +115,14 @@ export class ShowHUD {
         this.runOfShowPauseBtn.visible = !val
     }
     
+    showMsg(text:string,duration:number){
+        if(this.noticeSystem){
+            engine.addSystem(new ClickAnimationSystem(this.noticeSystem.uiText))
+            engine.addSystem(this.noticeSystem)
+            this.noticeSystem.setMsg(text,duration)
+        }
+    }
+ 
     async setupUI (){
         const host = this
 
@@ -171,7 +186,7 @@ export class ShowHUD {
         //this.uiMaximizedContainer.adaptWidth = true
         //this.uiMaximizedContainer.adaptHeight = true
         this.uiMaximizedContainer.width = 160
-        this.uiMaximizedContainer.height = 200//430
+        this.uiMaximizedContainer.height = 245//430
         this.uiMaximizedContainer.positionX = 0
         this.uiMaximizedContainer.positionY = 50
         this.uiMaximizedContainer.color = new Color4(0, 0, 0, 0.75)
@@ -224,6 +239,8 @@ export class ShowHUD {
 
             if(this.onPause) this.onPause()
         })
+
+        const Y_SHIFT = 40
 
         const playBtn = this.playBtn = new UIImage(this.uiMaximizedContainer, imageTexture)
         playBtn.sourceLeft = 97
@@ -282,9 +299,9 @@ export class ShowHUD {
         runOfShowPauseBtn.sourceWidth = 74
         runOfShowPauseBtn.sourceHeight = 74
         runOfShowPauseBtn.hAlign = 'right'
-        runOfShowPauseBtn.vAlign = 'top'
+        runOfShowPauseBtn.vAlign = 'bottom'
         runOfShowPauseBtn.positionX = -60// + 45
-        runOfShowPauseBtn.positionY = -10 + -120
+        runOfShowPauseBtn.positionY = 30
         runOfShowPauseBtn.width=40
         runOfShowPauseBtn.height=40
         runOfShowPauseBtn.isPointerBlocker = true
@@ -310,9 +327,9 @@ export class ShowHUD {
         runOfShowPlayBtn.sourceWidth = 74
         runOfShowPlayBtn.sourceHeight = 74
         runOfShowPlayBtn.hAlign = 'right'
-        runOfShowPlayBtn.vAlign = 'top'
+        runOfShowPlayBtn.vAlign = 'bottom'
         runOfShowPlayBtn.positionX = -60// + 45
-        runOfShowPlayBtn.positionY = -10 + -120
+        runOfShowPlayBtn.positionY = 30
         runOfShowPlayBtn.width=40
         runOfShowPlayBtn.height=40
         runOfShowPlayBtn.isPointerBlocker = true
@@ -338,9 +355,9 @@ export class ShowHUD {
         restartRunOfShow.sourceWidth = 74
         restartRunOfShow.sourceHeight = 74
         restartRunOfShow.hAlign = 'right'
-        restartRunOfShow.vAlign = 'top'  
+        restartRunOfShow.vAlign = 'bottom'  
         restartRunOfShow.positionX = -105// + 45
-        restartRunOfShow.positionY = -10 + -120 
+        restartRunOfShow.positionY = 30
         restartRunOfShow.width=40
         restartRunOfShow.height=40 
         restartRunOfShow.isPointerBlocker = true
@@ -364,7 +381,7 @@ export class ShowHUD {
         this.displayName = new UIText(this.uiMaximizedContainer)
         this.displayName.hAlign = 'center'
         this.displayName.vAlign = 'bottom'
-        this.displayName.positionY = 130//220
+        this.displayName.positionY = 130 + Y_SHIFT
         this.displayName.positionX = 0
         this.displayName.height = 10
         this.displayName.fontSize = 12
@@ -374,7 +391,7 @@ export class ShowHUD {
         this.videoStatus = new UIText(this.uiMaximizedContainer)
         this.videoStatus.hAlign = 'center'
         this.videoStatus.vAlign = 'bottom'
-        this.videoStatus.positionY = 110
+        this.videoStatus.positionY = 110  + Y_SHIFT
         this.videoStatus.positionX = 0
         this.videoStatus.height = 10
         this.videoStatus.fontSize = 12
@@ -384,11 +401,44 @@ export class ShowHUD {
         this.playTimes = new UIText(this.uiMaximizedContainer)
         this.playTimes.hAlign = 'center'
         this.playTimes.vAlign = 'bottom'
-        this.playTimes.positionY = 90
+        this.playTimes.positionY = 90  + Y_SHIFT
         this.playTimes.positionX = 0
         this.playTimes.height = 10
         this.playTimes.fontSize = 12
         this.playTimes.hTextAlign = "center"
+
+
+        this.playTimesLabel = new UIText(this.uiMaximizedContainer)
+        this.playTimesLabel.hAlign = 'center'
+        this.playTimesLabel.vAlign = 'bottom'
+        this.playTimesLabel.positionY = 80  + Y_SHIFT
+        this.playTimesLabel.positionX = 0
+        this.playTimesLabel.height = 10
+        this.playTimesLabel.fontSize = 8
+        this.playTimesLabel.hTextAlign = "center"
+        this.playTimesLabel.value ="video/lapse/subtitle"
+
+
+        this.actionCounts = new UIText(this.uiMaximizedContainer)
+        this.actionCounts.hAlign = 'center'
+        this.actionCounts.vAlign = 'bottom'
+        this.actionCounts.positionY = 60  + Y_SHIFT
+        this.actionCounts.positionX = 0
+        this.actionCounts.height = 10
+        this.actionCounts.fontSize = 12
+        this.actionCounts.hTextAlign = "center"
+        this.actionCounts.value = '-/-/-'
+
+
+        this.actionCountsLabel = new UIText(this.uiMaximizedContainer)
+        this.actionCountsLabel.hAlign = 'center'
+        this.actionCountsLabel.vAlign = 'bottom'
+        this.actionCountsLabel.positionY = 50  + Y_SHIFT
+        this.actionCountsLabel.positionX = 0
+        this.actionCountsLabel.height = 10
+        this.actionCountsLabel.fontSize = 8
+        this.actionCountsLabel.hTextAlign = "center"
+        this.actionCountsLabel.value ="processed/errors"
 
 
 
@@ -435,8 +485,26 @@ export class ShowHUD {
         maximizedLabel.paddingBottom = 5
         maximizedLabel.paddingLeft = 15
         maximizedLabel.fontSize = 12
+        maximizedLabel.positionY = 6
         //maximizedLabel.fontWeight = 'bold'
         maximizedLabel.isPointerBlocker = false
+
+        const noticeBox = this.noticeBox = new UIText(this.uiMaximizedContainer)
+        noticeBox.value = ''
+        noticeBox.color = Color4.White()
+        noticeBox.hAlign = 'center'
+        noticeBox.vAlign = 'bottom'
+        noticeBox.positionY = - 10
+        noticeBox.positionX = - 30
+        noticeBox.paddingTop = 0
+        noticeBox.paddingBottom = 5
+        noticeBox.paddingLeft = 15
+        noticeBox.fontSize = 12
+        //maximizedLabel.fontWeight = 'bold'
+        maximizedLabel.isPointerBlocker = false
+
+        this.noticeSystem = new NoticeBoxSystem(this.noticeBox)
+
 
         // Now that it is all set up, minimize it
         this.minimizeUI()
@@ -584,12 +652,12 @@ log("after hud")
 hud.pendingEntityAdd = new hudDelay(hud)
 engine.addSystem(hud.pendingEntityAdd)
 */
-export class ClickAnimationSystem {
+export class ClickAnimationSystem  implements ISystem{
 
-    uiIMage:UIImage
+    uiIMage:UICanvas
     timer = .1
 
-    constructor(image:UIImage){
+    constructor(image:UICanvas){
         this.uiIMage = image
     }
   update(dt: number) {
@@ -603,5 +671,31 @@ export class ClickAnimationSystem {
     }
   }
 }
+
+class NoticeBoxSystem implements ISystem{
+
+    uiText:UIText
+    timer = .1
+
+    constructor(text:UIText){
+        this.uiText = text
+    }
+    setMsg(text:string,duration:number){
+        this.uiText.value = text
+        this.timer = duration
+    }
+    update(dt: number) {
+        if (this.timer > 0) {
+            //this.uiText.opacity -= .3
+            this.uiText.visible = true
+            this.timer -= dt
+        } else {
+            this.timer = .1
+            this.uiText.visible = false
+            engine.removeSystem(this)
+        }
+    }
+}
+
 
 

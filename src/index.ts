@@ -12,7 +12,7 @@ export { DefineActionParams } from './showMgmt/actionHandlers/DefineActionParams
 export { DefineTargetGroupActionHandler } from './showMgmt/actionHandlers/DefineTargetGroupActionHandler'
 export { ShowActionHandlerSupport } from './showMgmt/actionHandlers/ShowActionHandlerSupport'
 export { ShowAnimationActionHandler,ActionHandlerAnimationParams } from './showMgmt/actionHandlers/ShowAnimationActionHandler'
-export { ShowAnounceActionHandler } from './showMgmt/actionHandlers/ShowAnounceActionHandler'
+export { ShowAnounceActionHandler,ActionHandlerAnouncementParams } from './showMgmt/actionHandlers/ShowAnounceActionHandler'
 export { ShowBasicActionHandler } from './showMgmt/actionHandlers/ShowBasicActionHandler'
 export { ShowBpmActionHandler } from './showMgmt/actionHandlers/ShowBpmActionHandler'
 export { ShowPauseAllActionHandler } from './showMgmt/actionHandlers/ShowPauseAllActionHandler'

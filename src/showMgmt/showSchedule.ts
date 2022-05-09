@@ -67,7 +67,6 @@ export class ShowSchedule{
     //log("findShowToPlayByDate",date.getTime(),startIndex)
     if(startIndex < 0){
       startIndex = 0
-      debugger
     }
     const showMatch:ShowMatchRangeResult = {}
 
@@ -88,7 +87,6 @@ export class ShowSchedule{
     //log("findShowToPlayByDate",date.getTime(),startIndex)
     if(startIndex < 0){
       startIndex = 0
-      debugger
     }
     const unixTime = date.getTime()/1000
 
@@ -113,13 +111,11 @@ export class ShowSchedule{
       const show = sortedShows[index]
       
       if(!show){
-        debugger
         log("undefined show element at " + index,show)
         continue;
       }
       
       if(show.startTime === undefined){
-        debugger
         log("warning undefined starttime",show)
         continue;
       }

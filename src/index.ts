@@ -11,15 +11,17 @@ export { DefineActionParams } from './showMgmt/actionHandlers/DefineActionParams
 
 export { DefineTargetGroupActionHandler } from './showMgmt/actionHandlers/DefineTargetGroupActionHandler'
 export { ShowActionHandlerSupport } from './showMgmt/actionHandlers/ShowActionHandlerSupport'
-export { ShowAnimationActionHandler } from './showMgmt/actionHandlers/ShowAnimationActionHandler'
+export { ShowAnimationActionHandler,ActionHandlerAnimationParams } from './showMgmt/actionHandlers/ShowAnimationActionHandler'
 export { ShowAnounceActionHandler } from './showMgmt/actionHandlers/ShowAnounceActionHandler'
 export { ShowBasicActionHandler } from './showMgmt/actionHandlers/ShowBasicActionHandler'
 export { ShowBpmActionHandler } from './showMgmt/actionHandlers/ShowBpmActionHandler'
 export { ShowPauseAllActionHandler } from './showMgmt/actionHandlers/ShowPauseAllActionHandler'
 export { ShowStopAllActionHandler } from './showMgmt/actionHandlers/ShowStopAllActionHandler'
 
-export {ShowSchedule} from './showMgmt/showSchedule'
-export {parseActionWithOpts,splitByWhiteSpace} from './showMgmt/actionHandlers/utils'
-export {fetchWorldTime} from './showMgmt/utils'
-export {VideoChangeStatusCallback,VideoSystem,DefaultVideoEvent}from './showMgmt/video/VideoSystem'
 
+export {ShowSchedule} from './showMgmt/showSchedule'
+export {parseActionWithOpts,splitByWhiteSpace,actionStartsWith} from './showMgmt/actionHandlers/utils'
+export {fetchWorldTime} from './showMgmt/utils'
+export {VideoChangeStatusCallback,VideoSystem,DefaultVideoEvent,VideoChangeStatusListener}from './showMgmt/video/VideoSystem'
+
+export {registerWithDebugUI,manageShowDebugUI} from './showMgmt/manageShowDebugUI'

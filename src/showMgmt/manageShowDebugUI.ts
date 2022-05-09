@@ -84,9 +84,9 @@ class ManageShowDebugUI{
 
 //TODO create singleton
 export const manageShowDebugUI = new ManageShowDebugUI()
-manageShowDebugUI.init()
- 
+
 isPreviewMode().then(preview=>{
+  manageShowDebugUI.init()
   manageShowDebugUI.setEnabled(preview)
 })
 

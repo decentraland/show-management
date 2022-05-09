@@ -1,8 +1,6 @@
-## SDK Library
+## Show Manager
 
-This project has the basics to start building your own library for using in Decentraland scenes.
-
-The libraries in the [Awesome Repository](https://github.com/decentraland-scenes/Awesome-Repository#Libraries) are available for all to use. We encourage you to create and share your own as well, we'd love to see the community grow and start sharing more reusable solutions to common problems through libraries!
+Provides helpers to schedule shows and sychronize actions with shows
 
 ## Publish
 
@@ -10,7 +8,7 @@ See [Create Libraries](https://docs.decentraland.org/development-guide/create-li
 
 Below is a template to help you craft documentation for your library, so others know how to use it.
 
-# MyAmazingLibrary Documentation
+# Show Manager Documentation
 
 myAmazingLibrary includes helpful solutions for `< insert use case >` in a Decentraland scene.
 
@@ -81,6 +79,14 @@ const showData: ShowDataType = {
 		}
 	]
 ```
+
+NOTE:  You maybe tempted to use ISO 8601 date format however there is no garetee 100% support it will be parsed correctly.  ISO 8601 format is the most universally supported however you cannot rely on correct implementation of the standard.  https://en.wikipedia.org/wiki/ISO_8601
+
+```
+new Date("2022-05-09T16:39:00-04:00").getTime()/1000 //use at your own risk
+```
+
+Here is one of many free helpful converter tools [https://www.epochconverter.com/](https://www.epochconverter.com/) to you convert to date and time to seconds for startTime
 
 
 #### Configure Show Example

@@ -1,4 +1,5 @@
 import { ShowActionManager } from "../manageShowActions"
+import { ShowEntityModel } from "../showEntity/showEntityModel"
 import { ActionParams,  ShowActionSupportArgs } from "./showActionHandler"
 import { ShowActionHandlerSupport } from "./ShowActionHandlerSupport"
 import { actionStartsWith } from "./utils"
@@ -37,7 +38,7 @@ export class ShowAnimationActionHandler extends ShowActionHandlerSupport<ActionH
     --play for 2 seconds and stops itself
     ANIMATE : stage_lights_top : {"animationName":"strobe", "duration":2}
   }*/
-  constructor(args:ShowActionSupportArgs<ActionHandlerAnimationParams>){
+  constructor(args?:ShowActionSupportArgs<ActionHandlerAnimationParams>){
     super(ShowAnimationActionHandler.DEFAULT_NAME,args)
   }
 
@@ -56,6 +57,47 @@ export class ShowAnimationActionHandler extends ShowActionHandlerSupport<ActionH
   }
   matches(action: string):boolean{
     return actionStartsWith(action,this.getName(),0," ")
+  }
+
+  //name: ShowAnimationActionHandler.DEFAULT_NAME,
+  process(actionResult: ActionParams<ActionHandlerAnimationParams>, showActionMgr: ShowActionManager): void {
+    const action = actionResult.params
+    
+    const srchResult = showActionMgr.findShowEntitiesByName(action.target)
+    
+    if(srchResult.missing){
+      log("WARNING could not find targets",action,srchResult.missing)
+      if(showActionMgr.manageShowDebugUI) showActionMgr.manageShowDebugUI.actionMgrWarnings ++
+      //return
+    } 
+    if(!srchResult.results){
+      if(showActionMgr.manageShowDebugUI) showActionMgr.manageShowDebugUI.actionMgrWarnings ++
+      log("WARNING no targets found",action,srchResult.results)
+      return
+    }
+    
+    log(this.getName(),"process()",action)
+    for(const p in srchResult.results) {
+      const target = srchResult.results[p]
+      const showEntity = target as ShowEntityModel
+
+      const noLoop = (action.loop !== undefined && action.loop==false)
+
+      if(action.play === undefined || action.play){
+        showEntity.playAnimation(  
+          action.animationName,
+          noLoop, 
+          action.duration,
+          action.speed,
+          action.interval,
+          (action.resetAnimation === undefined || action.resetAnimation),
+          action.layer 
+        )
+      }else{
+        log("calling stop!!")
+        showEntity.stop()
+      }
+    }
   }
 }
 

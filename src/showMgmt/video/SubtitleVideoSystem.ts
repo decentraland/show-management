@@ -1,17 +1,18 @@
 
-import { SubtitleSystem } from "src/subtitle/SubtitleSystem";
-import { manageShowDebugUI } from "../manageShowDebugUI";
+import { SubtitleSystem } from "src/modules/subtitle/SubtitleSystem";
+import { ManageShowDebugUI } from "../manageShowDebugUI";
 import { VideoSystem } from "./VideoSystem";
 
 
  
 export class SubtitleVideoSystem extends VideoSystem {
   subtitleSystem:SubtitleSystem
-  
-  constructor(_videoTexture: VideoTexture,subtitleSystem?:SubtitleSystem) {
+  manageShowDebugUI: ManageShowDebugUI
+
+  constructor(_videoTexture: VideoTexture,subtitleSystem?:SubtitleSystem,manageShowDebugUI?:ManageShowDebugUI) {
     super(_videoTexture)
     this.subtitleSystem = subtitleSystem
-    if(manageShowDebugUI) manageShowDebugUI.resetCounters()
+    this.manageShowDebugUI = manageShowDebugUI
   }
   pause(){
     //no need to pause subtitle, event listener for video state change will trigger pause
@@ -67,7 +68,7 @@ export class SubtitleVideoSystem extends VideoSystem {
       }
     }
 
-    if(manageShowDebugUI.enabled) manageShowDebugUI.setVideoStatus( videoStatusAsString(newStatus) )
+    if(this.manageShowDebugUI && this.manageShowDebugUI.enabled) this.manageShowDebugUI.setVideoStatus( videoStatusAsString(newStatus) )
     
     super.onChangeStatus(oldStatus,newStatus)
   } 
@@ -76,15 +77,15 @@ export class SubtitleVideoSystem extends VideoSystem {
     super.update(dt)
     this.subtitleSystem.update(dt)
 
-    if(manageShowDebugUI.enabled){
-      manageShowDebugUI.updateUICounter(dt)
+    if(this.manageShowDebugUI && this.manageShowDebugUI.enabled){
+      this.manageShowDebugUI.updateUICounter(dt)
     }
   } 
  
   onOffsetUpdate(estimatedOffset: number) {
     //log('SEEK onOffsetUpdate ', estimatedOffset) 
-    if(manageShowDebugUI.enabled){
-      manageShowDebugUI.updateVideoTimeValue( estimatedOffset , this.elapsedTime , this.subtitleSystem.offsetMs )
+    if(this.manageShowDebugUI && this.manageShowDebugUI.enabled){
+      this.manageShowDebugUI.updateVideoTimeValue( estimatedOffset , this.elapsedTime , this.subtitleSystem.offsetMs )
     }
     // mySubtitleSystem.setOffset(estimatedOffset)
   } 

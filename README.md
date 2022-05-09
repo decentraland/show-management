@@ -21,13 +21,13 @@ To use any of the helpers provided by this library:
 1. Install it as an npm package. Run this command in your scene's project folder:
 
    ```
-   npm install myAmazingLibrary
+   npm install show-mgmt-dcl
    ```
 
 2. Add this line at the start of your game.ts file, or any other TypeScript files that require it:
 
    ```ts
-   import * as magic from 'myAmazingLibrary'
+   import * as showMgmt from 'show-mgmt-dcl'
    ```
 
 ## Usage
@@ -97,6 +97,7 @@ const showData: showMgmt.ShowDataType = {
 		defaultShow,
 		{ 
 	    id: 1,
+	    title: 'Demo Show',
 	    artist: 'Demo Show',
 	    link: `videos/tunnelVisuals.mp4`,
 	    subs: DemoShowSubs,
@@ -223,6 +224,18 @@ SHOW_MGR.addPlayVideoListeners( (event:showMgmt.PlayShowEvent)=>{
 ```
 
 
+### Enable Debug UI
+
+```ts
+ 
+isPreviewMode().then(preview=>{
+  if(preview) {
+    SHOW_MGR.enableDebugUI(preview)
+    registerWithDebugUI( SHOW_MGR.manageShowDebugUI,SHOW_MGR, runOfShow  ) 
+  }
+})
+
+```
 
 ## Copyright info
 

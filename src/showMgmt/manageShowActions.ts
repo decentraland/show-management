@@ -6,6 +6,7 @@ import { DefineTargetGroup, DefineTargetGroupActionHandler } from './actionHandl
 import { ShowActionHandler } from './actionHandlers/showActionHandler'
 import { ShowBpmActionHandler } from './actionHandlers/ShowBpmActionHandler'
 import { ShowManager } from './manageShow'
+import { ManageShowDebugUI } from './manageShowDebugUI'
 
 // Default beats per minute of show
 export const DEFAULT_BPM = 120
@@ -44,6 +45,8 @@ export class ShowActionManager{
   bpm:number=DEFAULT_BPM
   randomizerSystem:RandomizerSystem
   
+  manageShowDebugUI:ManageShowDebugUI
+
   registeredShowEntities:Record<string,any>={}
   registeredActionHandlerMap:Record<string,ShowActionHandler<any>>={}
   //registeredActionsList:ShowActionHandler[] = []
@@ -140,6 +143,8 @@ export class ShowActionManager{
       log("does not have matches fn ",handler.matches) 
     }
 
+    
+
     if(handler && handler.matches(action,this)){
       this.executeHandler(action, handler)
       return true
@@ -217,8 +222,11 @@ export class ShowActionManager{
   private executeHandler(action: string, handler: ShowActionHandler<any>,) {
     try{ 
       log("EXECUTING HANDLER ",action,handler)  
+      if(this.manageShowDebugUI) this.manageShowDebugUI.actionMgrProcessed ++
+      
       handler.execute(action, this)
     }catch(e){
+      if(this.manageShowDebugUI) this.manageShowDebugUI.actionMgrErrors ++
       //log("FAILED EXECUTING HANDLER ",action,handler,e)  
       //this.onHandlerFailure()
       //if(!throwHandlerErrors) throw e;
@@ -229,7 +237,7 @@ export class ShowActionManager{
   } 
 
   onHandlerFailure(action: string, handler: ShowActionHandler<any>, e: any) {
-    log("FAILED EXECUTING HANDLER ",action,handler,e)  
+    log("ERROR FAILED EXECUTING HANDLER ",action,handler,e)  
   }
 }
 

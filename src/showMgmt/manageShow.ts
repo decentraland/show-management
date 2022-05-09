@@ -16,7 +16,7 @@ import {
 */
 //import { videoMat } from '../videoScreens'
 import { ShowActionManager } from './manageShowActions'
-import { manageShowDebugUI } from './manageShowDebugUI'
+import { ManageShowDebugUI } from './manageShowDebugUI'
 import { ShowSchedule } from './showSchedule'
 import { PlayShowEvent, ShowType, StopShowEvent } from './types'
 import { SubtitleVideoSystem } from './video/SubtitleVideoSystem'
@@ -46,16 +46,30 @@ export class ShowManager{
   playVideoListeners: ((event: PlayShowEvent)=>void)[] = []
   stopShowListeners: ((event: StopShowEvent)=>void)[] = []
   changeStatusListeners:VideoChangeStatusListener[] = []
+
+  manageShowDebugUI:ManageShowDebugUI
   
   //latestWorldTime:Date
 
   //// key functions
 
   constructor(){
+    //this.manageShowDebugUI = new ManageShowDebugUI()
     this.actionMgr = new ShowActionManager()
     this.showSchedule = new ShowSchedule() 
+    
   }
- 
+  
+  enableDebugUI(val:boolean){
+    if(!this.manageShowDebugUI){
+      this.manageShowDebugUI = new ManageShowDebugUI()
+      if(this.videoSystem) this.videoSystem.manageShowDebugUI = this.manageShowDebugUI
+      if(this.actionMgr) this.actionMgr.manageShowDebugUI = this.manageShowDebugUI
+    } 
+    this.manageShowDebugUI.init()
+    this.manageShowDebugUI.setEnabled(val)
+    
+  }
   pause(){
     this.videoSystem.pause()
     this.runAction(ShowPauseAllActionHandler.DEFAULT_NAME)
@@ -240,8 +254,8 @@ export class ShowManager{
 
     this.stopShow()
 
-    if(manageShowDebugUI.enabled){
-      manageShowDebugUI.updateDisplayNameValue( showData.artist )
+    if(this.manageShowDebugUI && this.manageShowDebugUI.enabled){
+      this.manageShowDebugUI.updateDisplayNameValue( showData.artist )
     }
     //offsetSeconds += 5
 
@@ -286,7 +300,9 @@ export class ShowManager{
     })
     this.addVideoStatusChangeListener( onPlaySeek )
 
-    this.videoSystem = new SubtitleVideoSystem(myVideoTexture,this.subtitleSystem)
+    if(this.manageShowDebugUI) this.manageShowDebugUI.resetCounters()
+
+    this.videoSystem = new SubtitleVideoSystem(myVideoTexture,this.subtitleSystem,this.manageShowDebugUI)
     engine.addSystem(this.videoSystem)
     //do not add this.subtitleSystem to engine as videoSystem will manage it
     //engine.addSystem(this.subtitleSystem)

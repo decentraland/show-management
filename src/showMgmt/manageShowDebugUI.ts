@@ -12,8 +12,9 @@ const canvas = new UICanvas()
 let debuggerUI_timeLapse=0
 let debuggerUI_checkIntervalSeconds=.1
 
-class ManageShowDebugUI{
+export class ManageShowDebugUI{
   
+  private static instance:ManageShowDebugUI
   
   displayNameValue:string
   videoTimeValue:string
@@ -23,7 +24,24 @@ class ManageShowDebugUI{
   checkIntervalSeconds=.1
   UI_timeLapse=0
 
+  videoEstimatedOffset:number=0
+  elapsedTime:number=0
+  subtitleOffset:number=0
+
+  actionMgrProcessed:number=0
+  actionMgrWarnings:number=0
+  actionMgrErrors:number=0
+
+
   showHud:ShowHUD
+
+  public static getInstance(): ManageShowDebugUI {
+    if (!ManageShowDebugUI.instance) {
+      ManageShowDebugUI.instance = new ManageShowDebugUI();
+    }
+
+    return ManageShowDebugUI.instance;
+}
 
   init(){
 /*
@@ -52,8 +70,10 @@ class ManageShowDebugUI{
   setVideoStatus(arg0: string) {
     this.showHud.videoStatus.value = arg0
   }
-  updateVideoTimeValue(estimatedOffset: number, elapsedTime: number, subtitleSystemOffsetMs: number) {
-    this.videoTimeValue = estimatedOffset.toFixed(2) +'/' + elapsedTime.toFixed(2) + '/' + (subtitleSystemOffsetMs/1000).toFixed(2)
+  updateVideoTimeValue(videoEstimatedOffset: number, elapsedTime: number, subtitleSystemOffsetMs: number) {
+    this.videoEstimatedOffset = videoEstimatedOffset
+    this.elapsedTime = elapsedTime
+    this.subtitleOffset = subtitleSystemOffsetMs
   }
   updateDisplayNameValue(val:string){
     this.displayNameValue = val
@@ -63,13 +83,21 @@ class ManageShowDebugUI{
     //manage high frequency update values
     if(this.UI_timeLapse > this.checkIntervalSeconds){
       this.UI_timeLapse = 0 
+      
+      if(this.showHud){
+        this.showHud.playTimes.value = this.videoEstimatedOffset.toFixed(2) +'/' + this.elapsedTime.toFixed(2) + '/' + (this.subtitleOffset/1000).toFixed(2)
+        this.showHud.displayName.value = this.displayNameValue
 
-      this.showHud.playTimes.value = this.videoTimeValue
-      this.showHud.displayName.value = this.displayNameValue
+        this.showHud.actionCounts.value = this.actionMgrProcessed.toFixed(0) +'/' + this.actionMgrWarnings.toFixed(0) + "/" + (this.actionMgrErrors).toFixed(0)
+        
+      }
     }
   }
   resetCounters(){
     this.UI_timeLapse = 0
+    this.actionMgrProcessed = 0
+    this.actionMgrSkipped = 0
+    this.actionMgrErrors = 0
   }
   setEnabled(val:boolean){
     this.enabled = val
@@ -79,25 +107,25 @@ class ManageShowDebugUI{
   toggleVisible(val:boolean){
     //this.videoTime.visible = val
     //this.videoStatus.visible = val
-  }
+  } 
 }
 
 //TODO create singleton
-export const manageShowDebugUI = new ManageShowDebugUI()
+//export const manageShowDebugUI = new ManageShowDebugUI()
 
-isPreviewMode().then(preview=>{
+/*isPreviewMode().then(preview=>{
   manageShowDebugUI.init()
   manageShowDebugUI.setEnabled(preview)
-})
-
-
-function playNext(showMgr: ShowManager,runOfShow:RunOfShowSystem,dir:number){
+})*/
+ 
+function playNext(manageShowDebugUI:ManageShowDebugUI,showMgr: ShowManager,runOfShow:RunOfShowSystem,dir:number){
   
   if(runOfShow && runOfShow.enabled){
     //ui.displayAnnouncement("Disable run of show first")
     log("Disable run of show first")
+    if(manageShowDebugUI && manageShowDebugUI.showHud) manageShowDebugUI.showHud.showMsg("Disable run of show first",3)
     return
-  }
+  } 
   let fromTime = new Date()
   if(showMgr.currentlyPlaying){
     
@@ -115,12 +143,12 @@ function playNext(showMgr: ShowManager,runOfShow:RunOfShowSystem,dir:number){
 
 }
 
-export function registerWithDebugUI(showMgr: ShowManager,runOfShow: RunOfShowSystem, manageShowDebugUI: ManageShowDebugUI){
+export function registerWithDebugUI(manageShowDebugUI: ManageShowDebugUI,showMgr: ShowManager,runOfShow: RunOfShowSystem){
 
   manageShowDebugUI.showHud.onPause = ()=>{ showMgr.pause()  }
   manageShowDebugUI.showHud.onPlay = ()=>{ showMgr.play()  }
-  manageShowDebugUI.showHud.onPlayNext = ()=>{  playNext(showMgr,runOfShow,1);  }
-  manageShowDebugUI.showHud.onPlayPrev = ()=>{  playNext(showMgr,runOfShow,-1) ; }
+  manageShowDebugUI.showHud.onPlayNext = ()=>{  playNext(manageShowDebugUI,showMgr,runOfShow,1);  }
+  manageShowDebugUI.showHud.onPlayPrev = ()=>{  playNext(manageShowDebugUI,showMgr,runOfShow,-1) ; }
 
   manageShowDebugUI.showHud.onRunOfShowPause = ()=>{ runOfShow.pause()  }
   manageShowDebugUI.showHud.onRunOfShowPlay = ()=>{ runOfShow.play()  }

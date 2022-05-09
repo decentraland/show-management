@@ -1,4 +1,4 @@
-import * as ui from '@dcl/ui-scene-utils'
+//import * as ui from '@dcl/ui-scene-utils'
 import { NodeCue } from '@dcl/subtitle-helper'
 import { isPreviewMode } from '@decentraland/EnvironmentAPI'
 import { IndexedNodeCue, SubtitleCueEvent, SubtitleSystem } from '../subtitle/SubtitleSystem'
@@ -94,7 +94,8 @@ isPreviewMode().then(preview=>{
 function playNext(showMgr: ShowManager,runOfShow:RunOfShowSystem,dir:number){
   
   if(runOfShow && runOfShow.enabled){
-    ui.displayAnnouncement("Disable run of show first")
+    //ui.displayAnnouncement("Disable run of show first")
+    log("Disable run of show first")
     return
   }
   let fromTime = new Date()

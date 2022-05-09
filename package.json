@@ -1,5 +1,5 @@
 {
-  "name": "show-manager",
+  "name": "@dcl/show-manager",
   "version": "1.0.0",
   "description": "DCL SDK Library for managing shows and syncing events to it",
   "main": "./dist/index.js",

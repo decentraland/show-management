@@ -36,6 +36,9 @@ export class ShowHUD {
     videoStatus:UIText
     playTimes:UIText
 
+    //as a property lets users change it if need be
+    imageAtlas = "https://gateway.pinata.cloud/ipfs/QmYyDWc67svskJWxQrZNJxjwNsvsXyG9dvVzXvJtYtmgAr"
+
     onRunOfShowRestart:()=>void
     onPause:()=>void
     onPlay:()=>void
@@ -110,7 +113,7 @@ export class ShowHUD {
 
         this.isSetup = true
         // load the image atlas
-        let imageAtlas = "https://github.com/wacaine/show-mgmt-dcl/blob/master/images/builderhud.png" //"src/showMgmt/showhud/builderhud.png"
+        let imageAtlas = this.imageAtlas //"https://gateway.pinata.cloud/ipfs/QmYyDWc67svskJWxQrZNJxjwNsvsXyG9dvVzXvJtYtmgAr" //"src/showMgmt/showhud/builderhud.png"
         let imageTexture = new Texture(imageAtlas)
 
         // Create canvas component

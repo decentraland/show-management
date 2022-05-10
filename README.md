@@ -13,6 +13,7 @@ Provides helpers to schedule shows and sychronize actions with shows
 - [Display the Show Video](#Display-the-Show-Video)
 - [Perform a specific action for a certian show](#Perform-a-specific-action-for-a-certian-show)
 - [Enable Debug UI](#Enable-Debug-UI)
+- [Adjust Logging Levels] (#Adjust-Logging-Levels)
 
 
 ## Install
@@ -249,6 +250,27 @@ isPreviewMode().then(preview=>{
     registerWithDebugUI( SHOW_MGR.manageShowDebugUI,SHOW_MGR, runOfShow  ) 
   }
 })
+
+```
+
+### Adjust Logging Levels
+
+To avoid flooding logs each class has its own logger named by class name.  You can adjust logging levels for all classes or just a few to suit your needs
+
+```ts
+//create a named logger
+const logger:showMgmt.Logger = showMgmt.LoggerFactory.getLogger("MyScene.ShowSetup.ts")
+
+//set logger for a specific logger
+logger.setLevel(showMgmt.LogLevel.DEBUG)
+
+//will set default logging level for all loggers
+showMgmt.LoggingConfiguration.getInstance().defaultLevel = showMgmt.LogLevel.DEBUG
+
+//set logger for a specific action handler logger
+const logHandlerAnimation = showMgmt.LoggerFactory.getLogger("ShowActionHandler."+showMgmt.ShowAnimationActionHandler.DEFAULT_NAME)
+if(logHandlerAnimation) logHandlerAnimation.setLevel(showMgmt.LogLevel.TRACE)
+
 
 ```
 

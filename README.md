@@ -13,7 +13,7 @@ Provides helpers to schedule shows and sychronize actions with shows
 - [Display the Show Video](#Display-the-Show-Video)
 - [Perform a specific action for a certian show](#Perform-a-specific-action-for-a-certian-show)
 - [Enable Debug UI](#Enable-Debug-UI)
-- [Adjust Logging Levels] (#Adjust-Logging-Levels)
+- [Adjust Logging Levels](#Adjust-Logging-Levels)
 
 
 ## Install
@@ -256,6 +256,16 @@ isPreviewMode().then(preview=>{
 ### Adjust Logging Levels
 
 To avoid flooding logs each class has its own logger named by class name.  You can adjust logging levels for all classes or just a few to suit your needs
+
+Classes of interest
+
+* ShowManager - manager class that is called to play shows
+* RunOfShowSystem - system that processes showSchedule and decides which show to play at the correct time
+* SubtitleVideoSystem - system that processes video events
+* SubtitleSystem - system that handles processing subtitles
+* ShowActionManager - processes an actions to be sent to a handler
+* ShowActionHandler - the action handlers them self
+
 
 ```ts
 //create a named logger

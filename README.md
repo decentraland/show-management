@@ -22,14 +22,19 @@ To use any of the helpers provided by this library:
 1. Install it as an npm package. Run this command in your scene's project folder:
 
    ```
-   npm install show-mgmt-dcl
+   npm i @dcl/show-management
    ```
 
 2. Add this line at the start of your game.ts file, or any other TypeScript files that require it:
 
    ```ts
-   import * as showMgmt from 'show-mgmt-dcl'
+   import * as showMgmt from '@dcl/show-management'
    ```
+
+> To be recognized you may also have to add an entry in tsconfig.json
+> ```
+> sdfs
+> ```
 
 ## Usage
 

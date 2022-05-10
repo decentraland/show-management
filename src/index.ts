@@ -1,5 +1,6 @@
 export * from './showMgmt/types'
 export {ShowManager} from './showMgmt/manageShow'
+export {LogLevel,LoggingConfiguration,LoggerFactory,Logger} from './logging/logging'
 export {
     FindEntityResult,ShowActionManager} from './showMgmt/manageShowActions'
 export {RunOfShowSystem} from './showMgmt/runOfShowSystem'

@@ -1,5 +1,6 @@
 import * as utils from '@dcl/ecs-scene-utils'
 import { NodeCue } from '@dcl/subtitle-helper'
+import { Logger, LoggerFactory } from '../logging/logging'
 import { IndexedNodeCue } from '../subtitle/SubtitleSystem'
 import { DefineActionAliasActionHandler } from './actionHandlers/DefineActionAliasActionHandler'
 import { DefineTargetGroup, DefineTargetGroupActionHandler } from './actionHandlers/DefineTargetGroupActionHandler'
@@ -45,7 +46,8 @@ export class ShowActionManager{
   defaultBPM:number=DEFAULT_BPM
   bpm:number=DEFAULT_BPM
   randomizerSystem:RandomizerSystem
-  
+  logger:Logger
+
   manageShowDebugUI:ManageShowDebugUI
 
   registeredShowEntities:Record<string,any>={}
@@ -68,6 +70,7 @@ export class ShowActionManager{
     //this.registerHandler(new RandomizerActionHandler())
     
     //this.registerHandler(new ShowBpmActionHandler())
+    this.logger = LoggerFactory.getLogger("ShowActionManager")
   } 
  
   registerShowEntity(name:string,object:any){
@@ -142,8 +145,9 @@ export class ShowActionManager{
     return this.registeredActionHandlerMap[name]
   }
   processAction(action:string,handler:ShowActionHandler<any>){
+    const METHOD_NAME = "processAction"
     if(handler && !handler.matches){
-      log("does not have matches fn ",handler.matches) 
+      this.logger.warn(METHOD_NAME,"does not have a matches fn ",handler.getName(),handler.matches) 
     }
 
     
@@ -155,7 +159,6 @@ export class ShowActionManager{
     return false
   }
   processActions(actions:string[],handlers:ShowActionHandler<any>| ShowActionHandler<any>[]){
-    
     for(const a in actions){
       const action = actions[a]
       for(const p in handlers){
@@ -167,7 +170,8 @@ export class ShowActionManager{
     }
   }
   runAction(action: string) {
-    log("running action",action)
+    const METHOD_NAME = "runAction"
+    this.logger.trace(METHOD_NAME,"running action",action)
 
     //CMD {}
     const overloaded = this.overrideRunAction ? this.overrideRunAction(action) : false
@@ -180,7 +184,7 @@ export class ShowActionManager{
    
     
       if(matchedHandler && matchedHandler.matches && matchedHandler.matches(action,this)){
-        log("execute calling for ",action)
+        this.logger.debug(METHOD_NAME,"execute calling for ",action)
         //exact match
         this.processAction(action,matchedHandler)
       }else{
@@ -209,7 +213,7 @@ export class ShowActionManager{
    
         break
       case 'PAUSEALL':
-        log('PAUSEALL')
+        this.logger.debug(METHOD_NAME,'PAUSEALL')
 
         break;
       default:
@@ -223,14 +227,15 @@ export class ShowActionManager{
 
 
   private executeHandler(action: string, handler: ShowActionHandler<any>,) {
+    const METHOD_NAME = "executeHandler"
     try{ 
-      log("EXECUTING HANDLER ",action,handler)  
+      this.logger.debug(METHOD_NAME,"EXECUTING HANDLER ",action,handler)  
       if(this.manageShowDebugUI) this.manageShowDebugUI.actionMgrProcessed ++
       
       handler.execute(action, this)
     }catch(e){
       if(this.manageShowDebugUI) this.manageShowDebugUI.actionMgrErrors ++
-      //log("FAILED EXECUTING HANDLER ",action,handler,e)  
+      //this.logger.error(METHOD_NAME,"FAILED EXECUTING HANDLER ",action,handler,e)  
       //this.onHandlerFailure()
       //if(!throwHandlerErrors) throw e;
       this.onHandlerFailure(action,handler,e)
@@ -240,7 +245,8 @@ export class ShowActionManager{
   } 
 
   onHandlerFailure(action: string, handler: ShowActionHandler<any>, e: any) {
-    log("ERROR FAILED EXECUTING HANDLER ",action,handler,e)  
+    const METHOD_NAME = "onHandlerFailure"
+    this.logger.error(METHOD_NAME,"ERROR FAILED EXECUTING HANDLER ",action,handler,e)  
   }
 }
 

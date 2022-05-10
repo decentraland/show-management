@@ -1,11 +1,7 @@
 //import * as ui from '@dcl/ui-scene-utils'
-import { NodeCue } from '@dcl/subtitle-helper'
-import { isPreviewMode } from '@decentraland/EnvironmentAPI'
-import { IndexedNodeCue, SubtitleCueEvent, SubtitleSystem } from '../subtitle/SubtitleSystem'
 import { ShowManager } from './manageShow'
 import { RunOfShowSystem } from './runOfShowSystem'
 import { hudDelay, ShowHUD } from './showhud/ShowHUD'
-import { ShowDataType, ShowResultType } from './types'
 
 const canvas = new UICanvas()
 
@@ -38,7 +34,7 @@ export class ManageShowDebugUI{
     }
 
     return ManageShowDebugUI.instance;
-}
+  }
 
   init(){
 /*

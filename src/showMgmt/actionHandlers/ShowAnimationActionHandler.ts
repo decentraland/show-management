@@ -61,22 +61,24 @@ export class ShowAnimationActionHandler extends ShowActionHandlerSupport<ActionH
 
   //name: ShowAnimationActionHandler.DEFAULT_NAME,
   process(actionResult: ActionParams<ActionHandlerAnimationParams>, showActionMgr: ShowActionManager): void {
+    const METHOD_NAME = "process"
     const action = actionResult.params
     
     const srchResult = showActionMgr.findShowEntitiesByName(action.target)
     
     if(srchResult.missing){
-      log("WARNING could not find targets",action,srchResult.missing)
+      this.logger.warn(METHOD_NAME,"could not find targets",action,srchResult.missing)
       if(showActionMgr.manageShowDebugUI) showActionMgr.manageShowDebugUI.actionMgrWarnings ++
       //return
     } 
     if(!srchResult.results){
       if(showActionMgr.manageShowDebugUI) showActionMgr.manageShowDebugUI.actionMgrWarnings ++
-      log("WARNING no targets found",action,srchResult.results)
+      this.logger.warn(METHOD_NAME,"no targets found",action,srchResult.results)
       return
     }
     
-    log(this.getName(),"process()",action)
+    this.logger.debug(METHOD_NAME,"",action)
+
     for(const p in srchResult.results) {
       const target = srchResult.results[p]
       const showEntity = target as ShowEntityModel
@@ -94,7 +96,7 @@ export class ShowAnimationActionHandler extends ShowActionHandlerSupport<ActionH
           action.layer 
         )
       }else{
-        log("calling stop!!")
+        this.logger.debug(METHOD_NAME,"calling stop!!")
         showEntity.stop()
       }
     }

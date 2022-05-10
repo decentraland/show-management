@@ -1,3 +1,4 @@
+import { Logger, LoggerFactory } from "../../logging/logging"
 import { ShowActionManager } from "../manageShowActions"
 import { ActionParams, OnProcessListener, ShowActionHandler, ShowActionSupportArgs } from "./showActionHandler"
 import { parseActionWithOpts } from "./utils"
@@ -5,6 +6,7 @@ import { parseActionWithOpts } from "./utils"
 export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
   name:string
   callbacks:OnProcessListener<ActionParams<T>>[]
+  logger:Logger
   constructor(name:string,args:ShowActionSupportArgs<T>){
     if(args && args.matches) this.matches = args.matches 
     //if(args && args.execute) this.execute = args.execute 
@@ -12,6 +14,7 @@ export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
     if(args && args.name) this.name = args.name
     if(args && args.decodeAction) this.decodeAction = args.decodeAction
     if(args && args.process) this.process = args.process
+    this.logger = LoggerFactory.getLogger(name)
   }
   getName(){ return this.name}
   addOnProcessListener(listener:OnProcessListener<ActionParams<T>>){
@@ -23,7 +26,8 @@ export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
     return false 
   }
   execute(action: string,showActionMgr:ShowActionManager):void{ 
-    log("execute called for ",action)
+    const METHOD_NAME = "execute"
+    this.logger.trace(METHOD_NAME," called for ",action)
     const decoded:ActionParams<T> = this.decodeAction(action,showActionMgr)
     if(this.process) this.process(decoded,showActionMgr) 
     

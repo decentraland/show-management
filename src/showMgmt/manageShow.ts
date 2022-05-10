@@ -1,5 +1,6 @@
 import { NodeCue } from '@dcl/subtitle-helper'
 import { isPreviewMode } from '@decentraland/EnvironmentAPI'
+import { Logger, LoggerFactory } from '../logging/logging' 
 import { IndexedNodeCue, SubtitleCueEvent, SubtitleSystem } from '../subtitle/SubtitleSystem'
 import { DefineActionAliasActionHandler } from './actionHandlers/DefineActionAliasActionHandler'
 import { DefineActionGroupActionHandler } from './actionHandlers/DefineActionGroupActionHandler'
@@ -33,6 +34,7 @@ function removeItem<T>(arr: Array<T>, value: T): Array<T> {
 }
 
 export class ShowManager{
+  logger:Logger
   currentlyPlaying: ShowType | null
   nextToPlay: ShowType | null
   
@@ -57,7 +59,7 @@ export class ShowManager{
     //this.manageShowDebugUI = new ManageShowDebugUI()
     this.actionMgr = new ShowActionManager()
     this.showSchedule = new ShowSchedule() 
-    
+    this.logger = LoggerFactory.getLogger("ShowManager")
   }
   
   enableDebugUI(val:boolean){
@@ -80,23 +82,24 @@ export class ShowManager{
     //this.runAction(ShowPauseAllActionHandler.RESUME)
   }
   isCurrentlyPlaying(showData:ShowType){
-    const retVal = this.currentlyPlaying && this.currentlyPlaying.id === showData.id
-    log("currentlyPlaying",retVal,showData,this.currentlyPlaying) 
+    const METHOD_NAME="isCurrentlyPlaying"
+    const retVal = showData && this.currentlyPlaying && this.currentlyPlaying.id === showData.id
+    this.logger.trace(METHOD_NAME,"",retVal,showData,this.currentlyPlaying) 
     return retVal
   }
-
   startShow(showData: ShowType) {
+    const METHOD_NAME="startShow"
     //TODO WHAT ABOUT PLAYING BUT NEED TO SEEK FORWARD
 
     //this.currentlyPlaying = null
     if(!showData){ 
       //TODO figure out how this should affect state, return boolean if did it?
-      log("startShow data is null, doing nothing",showData,this.currentlyPlaying)
+      this.logger.info(METHOD_NAME,"data is null, doing nothing",showData,this.currentlyPlaying)
       return
     }
     const currentlyPlaying = this.isCurrentlyPlaying(showData)
     if (currentlyPlaying){
-      log("startShow.already playing ",this.currentlyPlaying)//,this.videoSystem.estimatedOffset)
+      this.logger.info(METHOD_NAME,"startShow.already playing ",this.currentlyPlaying)//,this.videoSystem.estimatedOffset)
       return
     } 
 
@@ -110,40 +113,35 @@ export class ShowManager{
 
     //of start time is negative its not a schedule play song 
     if(showData.startTime < 0){
-      log("startShow.startShow was negative, dont calculate timeDiff")
+      this.logger.info(METHOD_NAME,"startShow was negative, dont calculate timeDiff")
       timeDiff = 0
     }
 
-    log(
+    this.logger.info(METHOD_NAME,"",
       'show started for ',
       showData.id,
       ' ',
-      timeDiff,
-      ' seconds ago, show playing: ',
-      showData
-    )
-    
-
-    log(
       'CURRENT TIME: ',
       currentTime,
       ' SHOW START: ',
       showData.startTime,
       ' DIFF: ',
-      timeDiff
+      timeDiff,
+      ' seconds ago, show playing: ',
+      showData
     )
-
+    
     if (timeDiff >= showData.length * 60) {
       if(startTime < 0){//if negative start time its can be played on demand
-        log('starting show anyways, ', timeDiff, ' seconds late')
+        this.logger.info(METHOD_NAME,'starting show anyways, ', timeDiff, ' seconds late')
         //start anyways
         this.playVideo(showData, timeDiff)
       }else{
-        log('show ended')
+        this.logger.info(METHOD_NAME,'show ended')
         return
       }
     } else {
-      log('starting show, ', timeDiff, ' seconds late')
+      this.logger.info(METHOD_NAME,'starting show, ', timeDiff, ' seconds late')
 
       this.playVideo(showData, timeDiff)
     }
@@ -184,6 +182,7 @@ export class ShowManager{
   }
 
   registerListenerToSubtitle(subtitleSystem:SubtitleSystem){
+    const METHOD_NAME = "registerListenerToSubtitle"
     subtitleSystem.addCueListener( 
       (cue: NodeCue,event:SubtitleCueEvent) => {
         try{
@@ -195,7 +194,7 @@ export class ShowManager{
         }catch(e){ 
           //DO not let this error bubble up, or state will be lost and all listeners wont get notified
           //it will cause them to be retried over and over.  maybe we want this at some point but not right now
-          log("WARNING ManageShow processOnCueBegin listener failed. Catching so others can complete",event,cue,e)
+          this.logger.warn(METHOD_NAME,"ManageShow processOnCueBegin listener failed. Catching so others can complete",event,cue,e)
         }
       }
     )
@@ -208,8 +207,9 @@ export class ShowManager{
     return actionNames
   }
   processOnCueBegin(cue: NodeCue) {
+    const METHOD_NAME = "processOnCueBegin"
     let actionNames = this.parseCue(cue)
-    log(`Show subtitle  '${cue.data.text}' (${actionNames.length}) at time: ${cue.data.start}`)
+    this.logger.debug(METHOD_NAME,`Show subtitle  '${cue.data.text}' (${actionNames.length}) at time: ${cue.data.start}`)
 
     //BREAK LINE AND SEND MULTIPLE
     for (const p in actionNames) {
@@ -218,12 +218,13 @@ export class ShowManager{
     }
   }
   processExpiredCues(offsetSeconds:number){
+    const METHOD_NAME = "processOnCueBegin"
     const offsetMS = (offsetSeconds) * 1000
     // Filter by cues with time window in 'newOffset'
     const pastCues = this.subtitleSystem.cueList.filter(
       ($) => offsetMS > $.data.end
     )
-    log("processExpiredCues found these pastCues that expired",pastCues)
+    this.logger.debug(METHOD_NAME,"processExpiredCues found these pastCues that expired",pastCues)
  
     //FIXME THIS is greedy,maybe have the handler describe itself for a more dynamic lookup
     //find handlers that define things as we need these definitions still
@@ -250,7 +251,8 @@ export class ShowManager{
 
   }
   playVideo(showData: ShowType, offsetSeconds: number) {
-    log('playVideo show ', showData)
+    const METHOD_NAME = "playVideo"
+    this.logger.info(METHOD_NAME,'playVideo show ', showData)
 
     this.stopShow()
 
@@ -282,10 +284,10 @@ export class ShowManager{
     //offsetSeconds += 5 
     let firstTimePlaying = true
     const onPlaySeek = new VideoChangeStatusListener((oldStatus: VideoStatus, newStatus: VideoStatus)=>{
-       log("VideoChangeStatusListener.onPlaySeek fire",newStatus)
+      this.logger.debug(METHOD_NAME,"VideoChangeStatusListener.onPlaySeek fire",newStatus)
       switch(newStatus){ 
         case VideoStatus.PLAYING:        
-          log("SEEKING!!!!",offsetSeconds,this.currentlyPlaying)    
+        this.logger.info(METHOD_NAME,"SEEKING!!!!",offsetSeconds,this.currentlyPlaying)    
           if(firstTimePlaying){ 
             firstTimePlaying = false
             this.videoSystem.setOffsetSeekVideo(offsetSeconds)  
@@ -310,7 +312,7 @@ export class ShowManager{
        
     this.videoSystem.changeStatusListeners.push( 
       new VideoChangeStatusListener((oldStatus: VideoStatus, newStatus: VideoStatus) => {
-        log("VideoChangeStatusListener this.videoSystem.changeStatusListeners",this.changeStatusListeners.length)
+        this.logger.debug(METHOD_NAME,"VideoChangeStatusListener this.videoSystem.changeStatusListeners",this.changeStatusListeners.length)
         for(const p in this.changeStatusListeners){
           this.changeStatusListeners[p].update(oldStatus,newStatus)
         }
@@ -326,7 +328,7 @@ export class ShowManager{
      
     let artistSignAnimation = 'artist' + (showData.id + 1)
 
-    log('ARTIST NAME', artistSignAnimation)
+    this.logger.debug(METHOD_NAME,'ARTIST NAME', artistSignAnimation)
 
     this.runAction(artistSignAnimation)
     //setArtistName(showData.artist)
@@ -343,6 +345,9 @@ export class ShowManager{
   }
   addVideoStatusChangeListener(listener:VideoChangeStatusListener){
     this.changeStatusListeners.push(listener)
+  }
+  isDefaultVideoPlaying(){
+    return this.isCurrentlyPlaying(this.showSchedule.getDefaultVideo())
   }
   playDefaultVideo(nextShow?: ShowType[]) {
     /*if (this.currentlyPlaying && this.currentlyPlaying.id == this.showData.defaultShow.id) {

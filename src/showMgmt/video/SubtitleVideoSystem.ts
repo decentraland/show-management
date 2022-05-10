@@ -1,5 +1,6 @@
 
 
+import { Logger, LoggerFactory } from "../../logging/logging";
 import { SubtitleSystem } from "../../subtitle/SubtitleSystem";
 import { ManageShowDebugUI } from "../manageShowDebugUI";
 import { VideoSystem } from "./VideoSystem";
@@ -9,11 +10,13 @@ import { VideoSystem } from "./VideoSystem";
 export class SubtitleVideoSystem extends VideoSystem {
   subtitleSystem:SubtitleSystem
   manageShowDebugUI: ManageShowDebugUI
+  logger:Logger
 
   constructor(_videoTexture: VideoTexture,subtitleSystem?:SubtitleSystem,manageShowDebugUI?:ManageShowDebugUI) {
     super(_videoTexture)
     this.subtitleSystem = subtitleSystem
     this.manageShowDebugUI = manageShowDebugUI
+    this.logger = LoggerFactory.getLogger("ShowManager")
   }
   pause(){
     //no need to pause subtitle, event listener for video state change will trigger pause
@@ -51,8 +54,9 @@ export class SubtitleVideoSystem extends VideoSystem {
   }
   //TODO consider subscription model
   onChangeStatus(oldStatus: VideoStatus, newStatus: VideoStatus) {
+    const METHOD_NAME="onChangeStatus"
     if (newStatus == VideoStatus.PLAYING) {
-      log(
+      this.logger.debug(METHOD_NAME,
         `VideoTexture ${this.videoTexture.videoClipId} is now playing! Offset ${this.estimatedOffset}`
       )
       if (this.subtitleSystem) {
@@ -61,7 +65,7 @@ export class SubtitleVideoSystem extends VideoSystem {
 
       //   mySubtitleSystem.setOffset(this.estimatedOffset)
     } else {
-      log(
+      this.logger.debug(METHOD_NAME,
         `VideoTexture ${this.videoTexture.videoClipId} changed status to '${newStatus}'`
       )
       if (this.subtitleSystem) {

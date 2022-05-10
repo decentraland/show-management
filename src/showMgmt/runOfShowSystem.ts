@@ -1,7 +1,6 @@
-import * as utils from '@dcl/ecs-scene-utils'
-import { getUserAccount } from '@decentraland/EthereumController';
+import { Logger, LoggerFactory } from '../logging/logging';
 import { ShowManager } from './manageShow';
-import { ShowMatchRangeResult, ShowType } from './types';
+import { ShowMatchRangeResult } from './types';
 
 
 export let adminList = ["0x7a3891acf4f3b810992c4c6388f2e37357d7d3ab", "0xaabe0ecfaf9e028d63cf7ea7e772cf52d662691a", "0xd210dc1dd26751503cbf1b8c9154224707820da8"]
@@ -10,7 +9,8 @@ export let adminList = ["0x7a3891acf4f3b810992c4c6388f2e37357d7d3ab", "0xaabe0ec
 export class RunOfShowSystem implements ISystem{
 
   showMgr:ShowManager
-  
+  logger:Logger
+
   intermissionStarted = false
   countdownStarted = false
   lastShowIdx = 0
@@ -28,6 +28,7 @@ export class RunOfShowSystem implements ISystem{
       //this.days= days 
       this.showMgr = showMgr
       //this.showsSorted = this.showMgr.showSchedule.shows//showData.shows.sort((a, b) => (a.startTime < b.startTime) ? -1 : 1);
+      this.logger = LoggerFactory.getLogger("RunOfShowSystem")
   }
   reset(){
     this.lastShowIdx = 0
@@ -60,7 +61,7 @@ export class RunOfShowSystem implements ISystem{
     
     const showMatch = this.lastShowMatch = this.showMgr.showSchedule.findShowToPlayByDateInPlace( this.lastShowMatch, date,this.lastShowIdx )
 
-    log("showMatch",showMatch)
+    //log("showMatch",showMatch)
 
     if(showMatch && showMatch.lastShow && showMatch.lastShow.show){
       //update index for faster checking
@@ -71,6 +72,7 @@ export class RunOfShowSystem implements ISystem{
     
   }
   processShow(showMatch:ShowMatchRangeResult){
+    const METHOD_NAME="processShow"
     if(!showMatch){
       return
     }
@@ -80,18 +82,24 @@ export class RunOfShowSystem implements ISystem{
       //this.countdownStarted = false
 
       if((!this.showMgr.currentlyPlaying) || showMatch.currentShow.show.id !== this.showMgr.currentlyPlaying.id){
-        log('starting show', showMatch)
-        this.showMgr.startShow(showMatch.currentShow.show)
+        this.logger.info(METHOD_NAME,'starting show', showMatch)
+        const showToPlay = showMatch.currentShow.show
+        const currentlyPlaying = this.showMgr.isCurrentlyPlaying(showToPlay)
+        if(!currentlyPlaying){
+          this.showMgr.startShow(showToPlay)
+        }else{
+          this.logger.trace(METHOD_NAME,'did not play show, already playing or was null',currentlyPlaying,showToPlay)
+        }
       }else{
         //log('already running show', showMatch)
       } 
     }else{
       if(showMatch.nextShow && showMatch.nextShow.show){
-        log('waiting till show start',showMatch)
+        this.logger.trace(METHOD_NAME,'waiting till show start',showMatch)
           //this.intermissionStarted = true
           this.onNoShowToPlay(showMatch)
       }
-
+ 
       //this.showMgr.startCountdown(closestNotStartedShow.startTime)
       
     }
@@ -102,7 +110,14 @@ export class RunOfShowSystem implements ISystem{
     }
   }
   onNoShowToPlay(showMatch:ShowMatchRangeResult){
-    this.showMgr.playDefaultVideo()
+    const METHOD_NAME="onNoShowToPlay"
+    const currentlyPlaying = this.showMgr.isDefaultVideoPlaying()
+    if(!currentlyPlaying){
+      this.showMgr.playDefaultVideo()
+    }else{
+      this.logger.trace(METHOD_NAME,'did not play default show, already playing or was null',currentlyPlaying)
+    }
+     
   }
 
   onOutOfShowsToPlay(){

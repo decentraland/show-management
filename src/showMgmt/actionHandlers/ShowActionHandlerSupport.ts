@@ -14,7 +14,7 @@ export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
     if(args && args.name) this.name = args.name
     if(args && args.decodeAction) this.decodeAction = args.decodeAction
     if(args && args.process) this.process = args.process
-    this.logger = LoggerFactory.getLogger(name)
+    this.logger = LoggerFactory.getLogger("ShowActionHandler."+name)
   }
   getName(){ return this.name}
   addOnProcessListener(listener:OnProcessListener<ActionParams<T>>){
@@ -22,12 +22,13 @@ export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
     this.callbacks.push(listener)
   }
   matches(action: string,showActionMgr:ShowActionManager):boolean{ 
-    log(this.name,"matches()","implement me",action)
+    const METHOD_NAME = "matches()"
+    this.logger.debug(METHOD_NAME,"implement me!!",action)
     return false 
   }
   execute(action: string,showActionMgr:ShowActionManager):void{ 
     const METHOD_NAME = "execute"
-    this.logger.trace(METHOD_NAME," called for ",action)
+    this.logger.trace(METHOD_NAME," called ",action)
     const decoded:ActionParams<T> = this.decodeAction(action,showActionMgr)
     if(this.process) this.process(decoded,showActionMgr) 
     
@@ -38,11 +39,17 @@ export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
     }
   }
   process?(action: ActionParams<T>,showActionMgr:ShowActionManager):void{  
-    log(this.name,"process()","implement me",action)
+    const METHOD_NAME = "process()"
+    this.logger.debug(METHOD_NAME,"implement me!!",action)
   }
 
   decodeAction(action: string, showActionMgr: ShowActionManager):ActionParams<T>{
+    const METHOD_NAME = "decodeAction()"
+    this.logger.trace(METHOD_NAME," called ",action)
+
     const parseResult:ActionParams<T> = parseActionWithOpts(action)
+    
+    this.logger.trace(METHOD_NAME," parse result ",action,parseResult)
 
     return parseResult;
   }

@@ -5,7 +5,15 @@ Provides helpers to schedule shows and sychronize actions with shows
 
 # Show Manager Documentation
 
-myAmazingLibrary includes helpful solutions for `< insert use case >` in a Decentraland scene.
+
+- [Show Manager](#show-manager) 
+- [Configure Shows](#configure-shows) 
+- [Run Your Show](#run-your-show) 
+- [Event Listeners](#event-listeners) 
+- [Display the Show Video](#Display-the-Show-Video)
+- [Perform a specific action for a certian show](#Perform-a-specific-action-for-a-certian-show)
+- [Enable Debug UI](#Enable-Debug-UI)
+
 
 ## Install
 
@@ -163,7 +171,8 @@ SHOW_MGR.addVideoStatusChangeListener( new showMgmt.VideoChangeStatusListener((o
 
 ```
 
-### Show the current video in my scene 
+### Display the Show Video
+
 
 The Show Manager will create a video texture but does not know where to put it in your scene.  You can register to SHOW_MGR.addPlayVideoListeners and assign the video texture where it needs to go.
 

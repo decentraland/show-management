@@ -89,7 +89,7 @@ export class VideoSystem implements ISystem {
   protected onOffsetUpdate(estimatedOffset: Number) {}
 
   private updateEvent(event: IEvents['videoEvent']) {
-    log('VideoEvent in VideoSystem:', event)
+    //TRACE log('VideoEvent in VideoSystem:', event)
     if (this.lastVideoEventTick != 0.0) {  
       if (
         this.lastVideoEventData.videoStatus === undefined ||

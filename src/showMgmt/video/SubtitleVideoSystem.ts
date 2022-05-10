@@ -16,7 +16,7 @@ export class SubtitleVideoSystem extends VideoSystem {
     super(_videoTexture)
     this.subtitleSystem = subtitleSystem
     this.manageShowDebugUI = manageShowDebugUI
-    this.logger = LoggerFactory.getLogger("ShowManager")
+    this.logger = LoggerFactory.getLogger("SubtitleVideoSystem")
   }
   pause(){
     //no need to pause subtitle, event listener for video state change will trigger pause

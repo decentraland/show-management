@@ -294,51 +294,156 @@ Provided handlers with all functionality provided include
 * ShowAnimationActionHandler
 * ShowBpmActionHandler
 * DefineTargetGroupActionHandler
+* ShowAnounceActionHandler
 
-Handlers that require you to extend them by defining how they should function
+Handlers that are recommended you to extend them by defining how they should function
 
 * ShowPauseAllActionHandler
 * ShowStopAllActionHandler
-* ShowAnounceActionHandler
 
-To define how an action handler should behave, you must provide a process method.  In this example here it defines how the Anounce action handler should behave.
+#### Override Action Handler Behavior
+
+To define override an action handler should behave, you must provide a process method.  In this example here it defines how the Anounce action handler should behave.
+
+You can initiate your own version of the class
 
 ```ts
 SHOW_MGR.actionMgr.registerHandler(
   new showMgmt.ShowAnounceActionHandler( {
     process(action: showMgmt.ActionParams<showMgmt.ActionHandlerAnouncementParams>, showActionMgr: showMgmt.ShowActionManager): void {
+      //my custom process logic
       ui.displayAnnouncement(action.params.text,action.params.duration)
     }
   } )
 )
 ```
 
+OR fetch the existing one and overwrite its process callback
+
+```ts
+//example of how to extend the action by setting processExt callback
+const accounceHandler:showMgmt.ShowAnounceActionHandler 
+  = SHOW_MGR.actionMgr.getRegisteredHandler<showMgmt.ShowAnounceActionHandler>(showMgmt.ShowAnounceActionHandler.DEFAULT_NAME)
+
+accounceHandler.process = (action: showMgmt.ActionParams<showMgmt.ActionHandlerAnouncementParams>, showActionMgr: showMgmt.ShowActionManager): boolean {
+  const METHOD_NAME = "process"
+  accounceHandler.logger.debug(METHOD_NAME,"called",action)
+
+  return true
+}
+```
+
+#### Extend Action Handler Behavior
+
+To extend an action handler behavior, can provide processExt method.  In this example here it defines how to extend PauseAll action handler.
+
+```ts
+//example of how to extend the action by setting processExt callback
+const pauseHandler:showMgmt.ShowPauseAllActionHandler 
+  = SHOW_MGR.actionMgr.getRegisteredHandler<showMgmt.ShowPauseAllActionHandler>(showMgmt.ShowPauseAllActionHandler.DEFAULT_NAME)
+
+pauseHandler.processExt = (action: showMgmt.ActionParams<string>, showActionMgr: showMgmt.ShowActionManager): boolean {
+  const METHOD_NAME = "processExt"
+  pauseHandler.logger.debug(METHOD_NAME,"called",action)
+
+  //pause actions goes here
+  //some actions "stop" is a play or hide or show or stop
+
+  return true
+}
+```
+
+OR add an onProcessListerner.  The benefit of this is you can register as many actions as you need when you need. 
+
+```ts
+
+//example of how to extend the action by setting processExt callback
+const pauseHandler:showMgmt.ShowPauseAllActionHandler 
+  = SHOW_MGR.actionMgr.getRegisteredHandler<showMgmt.ShowPauseAllActionHandler>(showMgmt.ShowPauseAllActionHandler.DEFAULT_NAME)
+
+pauseHandler.addOnProcessListener( (action: showMgmt.ActionParams<string>, showActionMgr: showMgmt.ShowActionManager): boolean {
+  const METHOD_NAME = "addOnProcessListener"
+  pauseHandler.logger.debug(METHOD_NAME,"called",action)
+
+  //pause actions goes here
+  //some actions "stop" is a play or hide or show or stop
+
+  return true
+})
+```
+
 ### Make Your Own Show Action Handler
 
 Here is an example of how to make your very own action handler.  In this example we make a new action named "SAY" followed by the text to be said and register it to the show manager.
 
+An example where no arguments are required
+
 ```ts
 SHOW_MGR.actionMgr.registerHandler(
-  new  showMgmt.ShowActionHandlerSupport<string>( 
+  new  showMgmt.ShowBasicActionHandler( 
+    "SAY_HI",
+    {
+      process(action: showMgmt.ActionParams<string>, showActionMgr: showMgmt.ShowActionManager): boolean {
+        ui.displayAnnouncement('HI',1)
+        return true 
+      }
+    } )
+)
+```
+
+Example where you want to pass arguments.  The library provides a basic parser ```showMgmt.parseActionWithOpts```.  Expected a pattern of: 
+
+```
+ACTION_NAME TEXT_NO_SPACES TEXT_NO_SPACES2 ... (optional JSON string to be parsed as the very end) 
+```
+
+Implement your own for your own needs.
+
+```ts
+
+//define custom parameter object type
+type ActionTypeSay={
+  text?:string
+  duration?:number
+}
+
+//action will be used as follows
+//SAY words {"duration":"1"}
+SHOW_MGR.actionMgr.registerHandler(
+  new  showMgmt.ShowActionHandlerSupport<ActionTypeSay>( 
     "SAY",
     {
       matches(action: string,showActionMgr:showMgmt.ShowActionManager):boolean{ 
         return showMgmt.actionStartsWith(action,this.getName(),0," ")
       },
-      decodeAction(action: string, showActionMgr: showMgmt.ShowActionManager):showMgmt.ActionParams<string>{
+      decodeAction(action: string, showActionMgr: showMgmt.ShowActionManager):showMgmt.ActionParams<ActionTypeSay>{
         logger.debug("ACTION.SAY.decodeAction","called",action)
-        const decoded = showMgmt.parseActionWithOpts<string>(action)
-        decoded.params = decoded.array[1]
+        const decoded = showMgmt.parseActionWithOpts<ActionTypeSay>(action)
+        
+        let text = ""
+        //join the params back together, all except the json one
+        //it woudl be easier to just pass the text as part of the json 
+        //this is to demonstrate how you can transform the parsed params if need be
+        for(let x=1;x<decoded.array.length;x++){
+          const txt = decoded.array[x]
+          //check for beginning of json
+          if(txt.charAt(0)=='{')  break; 
+          text += txt + " "
+        }
+
+        if(!decoded.params) decoded.params = {}
+        if(!decoded.params.text) decoded.params.text = text
+
         return  decoded;
       },
-      process(action: showMgmt.ActionParams<string>, showActionMgr: showMgmt.ShowActionManager): boolean {
-        ui.displayAnnouncement(action.params,1)
+      process(action: showMgmt.ActionParams<ActionTypeSay>, showActionMgr: showMgmt.ShowActionManager): boolean {
+        const duration = action.params.duration ? action.params.duration : 1
+        ui.displayAnnouncement(action.params.text,duration)
 
         return true
       }
     } )
 )
-
 ```
 
 ### Adjust Logging Levels

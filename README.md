@@ -294,25 +294,59 @@ isPreviewMode().then(preview=>{
 
 Show action handlers are what convert the commands in the subtitle file into something in your scene
 
-There are two types of handlers provided.  Ones that have all the functionality they need and some that need you to finish them.  The latter require you to define how they function because there is no way to know exactly how each show will want to implement it.  For example the PAUSE action could mean lots of things, pause 1 animation but play another, hide one entity but show a different entity.  There is no way to predict all this so you must define it
+There are three types of handlers provided.  Ones that have all the functionality they need and some that need you to finish them.  The latter require you to define how they function because there is no way to know exactly how each show will want to implement it.  For example the PAUSE action could mean lots of things, pause 1 animation but play another, hide one entity but show a different entity.  There is no way to predict all this so you must define it.  The third type are onces that you make yourself.
 
-Provided handlers include
+Provided handlers with all functionality provided include
 
 * ShowAnimationActionHandler
 * ShowBpmActionHandler
 * DefineTargetGroupActionHandler
 
-Handlers that require you to define how they should function
+Handlers that require you to complete them by defining how they should function
 
 * ShowPauseAllActionHandler
 * ShowStopAllActionHandler
 * ShowAnounceActionHandler
 
-TODO SHOW HOW TO FINISH IMPLEMENTING
+To define how an action handler should behave, you must provide a process method.  In this example here it defines how the Anounce action handler should behave.
+
+```ts
+SHOW_MGR.actionMgr.registerHandler(
+  new showMgmt.ShowAnounceActionHandler( {
+    process(action: showMgmt.ActionParams<showMgmt.ActionHandlerAnouncementParams>, showActionMgr: showMgmt.ShowActionManager): void {
+      ui.displayAnnouncement(action.params.text,action.params.duration)
+    }
+  } )
+)
+```
 
 ### Make Your Own Show Action Handler
 
-TODO SHOW HOW
+Here is an example of how to make your very own action handler.  In this example we make a new action named "SAY" followed by the text to be said and register it to the show manager.
+
+```ts
+SHOW_MGR.actionMgr.registerHandler(
+  new  showMgmt.ShowActionHandlerSupport<string>( 
+    "SAY",
+    {
+      matches(action: string,showActionMgr:showMgmt.ShowActionManager):boolean{ 
+        return showMgmt.actionStartsWith(action,this.getName(),0," ")
+      },
+      decodeAction(action: string, showActionMgr: showMgmt.ShowActionManager):showMgmt.ActionParams<string>{
+        logger.debug("ACTION.SAY.decodeAction","called",action)
+        const decoded = showMgmt.parseActionWithOpts<string>(action)
+        decoded.params = decoded.array[1]
+        return  decoded;
+      },
+      process(action: showMgmt.ActionParams<string>, showActionMgr: showMgmt.ShowActionManager): boolean {
+        ui.displayAnnouncement(action.params,1)
+
+        return true
+      }
+    } )
+)
+
+```
 
 ### Adjust Logging Levels
 

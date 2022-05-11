@@ -301,6 +301,60 @@ Handlers that are recommended you to extend them by defining how they should fun
 * ShowPauseAllActionHandler
 * ShowStopAllActionHandler
 
+#### Show Action Handler Interface
+
+All action handlers implement a ShowActionHandler.  Matches(), Execute() and DecodeAction() are the most important methods.  Matches tests to see if the handler can process the action,  Execute processes it and DecodeAction provides a way to parse the action to a more structured object 
+
+```
+interface ShowActionHandler<T>{
+  // will test if the action sent can be procssed by this handler  
+  matches(action:string,showActionMgr:ShowActionManager):boolean
+  
+  // if matches() returns true, execute will be called to process the action 
+  execute(action:string,showActionMgr:ShowActionManager):void
+  
+  // Will decode/parse the action into a more meaningful structure 
+  decodeAction(action:string,showActionMgr:ShowActionManager):ActionParams<T>
+  
+  ....
+}
+```
+
+#### Parsing Actions
+
+The library provides a basic parser ```showMgmt.parseActionWithOpts```.  Expected a pattern of: 
+
+```
+ACTION_NAME TEXT_NO_SPACES TEXT_NO_SPACES2 ... (optional JSON string to be parsed as the very end) 
+```
+
+The return object looks like this
+
+```
+type ActionParams<T>={
+  array?:string[] //parameters split on whitespace
+  params?:T // JSON object here if one passed
+}
+```
+
+Example
+
+```
+const exampleAction = 'ANIMATE djTable {"animationName":"deckTableOn", "loop":true,"bpmSync":true}'
+//when parsed
+const parsedActionParams = showMgmt.parseActionWithOpts( exampleAction )
+
+//output will be 
+{
+  array: ["ANIMATE","djTable",'{"animationName":"deckTableOn", "loop":true,"bpmSync":true}'],
+  params: {"animationName":"deckTableOn", "loop":true,"bpmSync":true}
+}
+```
+
+You can implement your own parser if need be.
+
+
+
 #### Override Action Handler Behavior
 
 To define override an action handler should behave, you must provide a process method.  In this example here it defines how the Anounce action handler should behave.
@@ -391,13 +445,7 @@ SHOW_MGR.actionMgr.registerHandler(
 )
 ```
 
-Example where you want to pass arguments.  The library provides a basic parser ```showMgmt.parseActionWithOpts```.  Expected a pattern of: 
-
-```
-ACTION_NAME TEXT_NO_SPACES TEXT_NO_SPACES2 ... (optional JSON string to be parsed as the very end) 
-```
-
-Implement your own for your own needs.
+Example where you want to pass arguments. 
 
 ```ts
 
@@ -422,13 +470,12 @@ SHOW_MGR.actionMgr.registerHandler(
         
         let text = ""
         //join the params back together, all except the json one
-        //it woudl be easier to just pass the text as part of the json 
-        //this is to demonstrate how you can transform the parsed params if need be
+        //it would be easier to pass all arguments as part of the json BUT
+        //this demonstrates how you can transform the parsed params if need be
         for(let x=1;x<decoded.array.length;x++){
-          const txt = decoded.array[x]
           //check for beginning of json
-          if(txt.charAt(0)=='{')  break; 
-          text += txt + " "
+          if(decoded.array[x].charAt(0)=='{')  break; 
+          text += decoded.array[x] + " "
         }
 
         if(!decoded.params) decoded.params = {}

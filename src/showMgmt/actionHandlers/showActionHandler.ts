@@ -15,23 +15,40 @@ export type ActionParams<T>={
 }
 
 export interface ShowActionHandler<T>{
-  //name:string
+  /**
+   * will test if the action sent can be procssed by this handler  
+   * @param action - string of the action to be assessed
+   * @param showActionMgr - show action manager 
+   * @returns true if can process action, false if not
+   */
   matches(action:string,showActionMgr:ShowActionManager):boolean
+  /**
+   * if matches() returns true, execute will be called to process the action
+   * @param action string action to be handled
+   * @param showActionMgr 
+   */
   execute(action:string,showActionMgr:ShowActionManager):void
   /**
-   * returns the command name
+   * returns the action handler name
    */
   getName():string
-
+  /**
+   * add listeners to be fired when the handler processes an action
+   * @param listener to be added
+   */
   addOnProcessListener(listener:OnProcessListener<ActionParams<T>>):void
+
   /**
-   * returns the pattern it matches on
+   * removes listeners to be fired when the handler processes an action
+   * @param listener to be removed
    */
-  //pattern:()=>string
+  removeOnProcessListener(listener:OnProcessListener<ActionParams<T>>):void
+  
   /**
-   * true means no more handlers processed
+   * Will decode/parse the action into a more meaningful structure
+   * @param action string action to be decoded
+   * @param showActionMgr 
    */
-  //isLast():boolean
   decodeAction(action:string,showActionMgr:ShowActionManager):ActionParams<T>
 }
 

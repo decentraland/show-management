@@ -6,6 +6,7 @@ import { actionStartsWith, splitByWhiteSpace } from "./utils"
 
 
 export type DefineTargetGroupType={
+  name?:string
   targets?:any[]
   targetNames?:string[]
 }
@@ -17,11 +18,13 @@ export type DefineTargetGroupType={
  * DEFINE TARGET_GROUP top_lights light1,light2,light3
  */
 export class DefineTargetGroup{
+  name?:string
   targetNames:string[]
   targets:any[]
   constructor(args:DefineTargetGroupType){
+    this.name = args.name
     this.targetNames = args.targetNames
-    this.targets = args.targets
+    this.targets = args.targets  
   }
 }
 
@@ -36,6 +39,7 @@ export class DefineTargetGroupActionHandler extends ShowActionHandlerSupport<Def
     return actionStartsWith(action,this.name,0," ") 
   } 
   decodeAction(action: string, showActionMgr: ShowActionManager): ActionParams<DefineActionParams<DefineTargetGroupType>> {
+
     var result:ActionParams<DefineActionParams<DefineTargetGroupType>>={array:[]}
     const arr = splitByWhiteSpace(action)
 
@@ -52,7 +56,8 @@ export class DefineTargetGroupActionHandler extends ShowActionHandlerSupport<Def
       }
     }
     result.params.opts = {targetNames:targets}
-    
+    result.params.opts.name = result.params.name
+
     return result 
   }
   process(action: ActionParams<DefineActionParams<DefineTargetGroupType>>, showActionMgr: ShowActionManager): boolean {

@@ -20,18 +20,11 @@ import { ShowActionManager } from './manageShowActions'
 import { ManageShowDebugUI } from './manageShowDebugUI'
 import { ShowSchedule } from './showSchedule'
 import { PlayShowEvent, ShowType, StopShowEvent } from './types'
+import { removeItemFromArray } from './utils'
 import { SubtitleVideoSystem } from './video/SubtitleVideoSystem'
 import { VideoChangeStatusListener, VideoSystem } from './video/VideoSystem'
 
 let PLAYING_DEFAULT: boolean = false
-
-function removeItem<T>(arr: Array<T>, value: T): Array<T> { 
-  const index = arr.indexOf(value);
-  if (index > -1) {
-    arr.splice(index, 1);
-  }
-  return arr;
-}
 
 export class ShowManager{
   logger:Logger
@@ -341,7 +334,7 @@ export class ShowManager{
     }
   }
   removeVideoStatusChangeListener(listener:VideoChangeStatusListener) {
-    this.changeStatusListeners = removeItem(this.changeStatusListeners,listener)
+    this.changeStatusListeners = removeItemFromArray(this.changeStatusListeners,listener)
   }
   addVideoStatusChangeListener(listener:VideoChangeStatusListener){
     this.changeStatusListeners.push(listener)

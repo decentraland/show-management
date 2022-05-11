@@ -127,7 +127,7 @@ export class ShowSchedule{
         ,"showdate.start",new Date(show.startTime * 1000).toLocaleString()
         ,"showdate.end",new Date(show.startTime * 1000 + (show.length * 1000)).toLocaleString(),"now",new Date().toLocaleString(),show)*/
 
-      if(show.startTime > 0 && showDiff < nearestShowToNowDiff){
+      if(show.startTime > 0 &&  Math.abs(showDiff) < Math.abs(nearestShowToNowDiff)){
         nearestShowToNow = show
         nearestShowIndex = index
         nearestShowToNowDiff = showDiff

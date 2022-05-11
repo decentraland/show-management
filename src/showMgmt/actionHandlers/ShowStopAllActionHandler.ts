@@ -5,7 +5,7 @@ import { actionStartsWith } from "./utils"
 
 export class ShowStopAllActionHandler extends ShowBasicActionHandler{
   public static DEFAULT_NAME = 'STOPALL'
-  constructor(args:ShowActionSupportArgs<string>){
+  constructor(args?:ShowActionSupportArgs<string>){
     super(ShowStopAllActionHandler.DEFAULT_NAME,args)
   }
   //isLast(action: string):boolean{ return false }

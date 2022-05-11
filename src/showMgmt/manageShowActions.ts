@@ -8,6 +8,8 @@ import { ShowActionHandler } from './actionHandlers/showActionHandler'
 import { ShowAnimationActionHandler } from './actionHandlers/ShowAnimationActionHandler'
 import { ShowAnounceActionHandler } from './actionHandlers/ShowAnounceActionHandler'
 import { ShowBpmActionHandler } from './actionHandlers/ShowBpmActionHandler'
+import { ShowPauseAllActionHandler } from './actionHandlers/ShowPauseAllActionHandler'
+import { ShowStopAllActionHandler } from './actionHandlers/ShowStopAllActionHandler'
 import { ShowManager } from './manageShow'
 import { ManageShowDebugUI } from './manageShowDebugUI'
 
@@ -68,6 +70,8 @@ export class ShowActionManager{
     this.registerHandler(new DefineActionAliasActionHandler())
     this.registerHandler(new ShowAnimationActionHandler())
     this.registerHandler(new ShowAnounceActionHandler())
+    this.registerHandler(new ShowPauseAllActionHandler())
+    this.registerHandler(new ShowStopAllActionHandler())
     
     //this.registerHandler(new RandomizerActionHandler())
     

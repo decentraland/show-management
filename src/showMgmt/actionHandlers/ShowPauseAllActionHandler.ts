@@ -6,7 +6,7 @@ import { actionStartsWith } from "./utils"
 
 export class ShowPauseAllActionHandler extends ShowBasicActionHandler{
   public static DEFAULT_NAME = 'PAUSEALL'
-  constructor(args:ShowActionSupportArgs<string>){
+  constructor(args?:ShowActionSupportArgs<string>){
     super(ShowPauseAllActionHandler.DEFAULT_NAME,args)
   }
   //isLast(action: string):boolean{ return false }
@@ -26,7 +26,7 @@ export class ShowPauseAllActionHandler extends ShowBasicActionHandler{
     }
     return true
   }
-  
+
   pauseEntity(obj: any) {
     const METHOD_NAME = "pauseEntity"
     if(obj instanceof ShowEntityModel){

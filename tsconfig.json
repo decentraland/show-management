@@ -16,6 +16,10 @@
         "node_modules/@dcl/ecs-scene-utils/dist/index.d.ts",
         "node_modules\\@dcl\\ecs-scene-utils\\dist\\index.d.ts"
       ],
+      "@dcl/ui-scene-utils": [
+        "node_modules/@dcl/ui-scene-utils/dist/index.d.ts",
+        "node_modules\\@dcl\\ui-scene-utils\\dist\\index.d.ts"
+      ],
       "@dcl/subtitle-helper": [
         "node_modules/@dcl/subtitle-helper/dist/index.d.ts",
         "node_modules\\@dcl\\subtitle-helper\\dist\\index.d.ts"

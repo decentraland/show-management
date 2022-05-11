@@ -36,11 +36,17 @@
   },
   "dependencies": {
     "@dcl/ecs-scene-utils": "^1.7.5",
-    "@dcl/subtitle-helper": "^6.0.0"
+    "@dcl/subtitle-helper": "^6.0.0",
+    "@dcl/ui-scene-utils": "^1.8.3"
   },
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0",
     "yarn": "please use npm"
-  }
+  },
+  "bundleDependencies": [
+    "@dcl/ecs-scene-utils",
+    "@dcl/subtitle-helper",
+    "@dcl/ui-scene-utils"
+  ]
 }

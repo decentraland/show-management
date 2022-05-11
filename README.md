@@ -361,7 +361,7 @@ OR add an onProcessListerner.  The benefit of this is you can register as many a
 const pauseHandler:showMgmt.ShowPauseAllActionHandler 
   = SHOW_MGR.actionMgr.getRegisteredHandler<showMgmt.ShowPauseAllActionHandler>(showMgmt.ShowPauseAllActionHandler.DEFAULT_NAME)
 
-pauseHandler.addOnProcessListener( (action: showMgmt.ActionParams<string>, showActionMgr: showMgmt.ShowActionManager): boolean {
+pauseHandler.addOnProcessListener( (action: showMgmt.ActionParams<string>, showActionMgr: showMgmt.ShowActionManager): boolean => {
   const METHOD_NAME = "addOnProcessListener"
   pauseHandler.logger.debug(METHOD_NAME,"called",action)
 

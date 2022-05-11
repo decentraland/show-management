@@ -31,6 +31,8 @@ export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
     this.logger.trace(METHOD_NAME," called ",action)
     const decoded:ActionParams<T> = this.decodeAction(action,showActionMgr)
     if(this.process) this.process(decoded,showActionMgr) 
+    if(this.processExt) this.processExt(decoded,showActionMgr) 
+
     
     if(this.callbacks){
       for(const p in this.callbacks){
@@ -41,6 +43,16 @@ export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
   process?(action: ActionParams<T>,showActionMgr:ShowActionManager):void{  
     const METHOD_NAME = "process()"
     this.logger.debug(METHOD_NAME,"implement me!!",action)
+  }
+
+  /**
+   * override or extend me when you dont want to overrload process method
+   * @param action 
+   * @param showActionMgr 
+   */
+  processExt?(action: ActionParams<T>,showActionMgr:ShowActionManager):void{  
+    //const METHOD_NAME = "processExt()"
+    //this.logger.debug(METHOD_NAME,"implement me!!",action)
   }
 
   decodeAction(action: string, showActionMgr: ShowActionManager):ActionParams<T>{

@@ -1,6 +1,6 @@
 ## Show Manager
 
-Provides helpers to schedule shows and sychronize actions with shows
+Show Manager provides helpers to schedule when to play videos.  You can specify a specific time a video should play and in what order to play the videos.  It also provides a way to and sychronize actions with those videos to make much more emersive show
 
 
 # Show Manager Documentation
@@ -8,11 +8,14 @@ Provides helpers to schedule shows and sychronize actions with shows
 
 - [Show Manager](#show-manager) 
 - [Configure Shows](#configure-shows) 
+- [Syncing Actions to Video] (#Syncing-Actions-to-Video)
 - [Run Your Show](#run-your-show) 
 - [Event Listeners](#event-listeners) 
 - [Display the Show Video](#Display-the-Show-Video)
 - [Perform a specific action for a certian show](#Perform-a-specific-action-for-a-certian-show)
 - [Enable Debug UI](#Enable-Debug-UI)
+- [Show Action Handlers](#Show-Action-Handlers)
+- [Make Your Own Show Action Handler](#Make-Your-Show-Action-Handlers)
 - [Adjust Logging Levels](#Adjust-Logging-Levels)
 
 
@@ -115,7 +118,7 @@ const showData: showMgmt.ShowDataType = {
 	    title: 'Demo Show',
 	    artist: 'Demo Show',
 	    link: `videos/tunnelVisuals.mp4`,
-	    subs: DemoShowSubs,
+	    subs: DemoShowSubs, //this is a variable holding the SRT format
 	    startTime: testStartTime, //start time from UTC in seconds
 	    length: 28,
 	  }
@@ -124,6 +127,40 @@ const showData: showMgmt.ShowDataType = {
 ```
 
 
+### Syncing Actions to Video
+
+To sync action to video we make use of a subtitle file format called SubRip Subtitle (SRT). 
+
+If you would like to learn more about SRT format check these out
+
+* https://en.wikipedia.org/wiki/SubRip
+* https://www.3playmedia.com/blog/create-srt-file/
+
+
+
+Here is an example SRT format that 
+
+```
+1
+00:00:01,000 --> 00:00:01,033
+ANNOUNCE {"text":"Welcome to our show","duration":3}
+ANIMATE djTable {"animationName":"deckTableOn", "loop":true,"bpmSync":true}
+```
+
+Here is the same SRT example but with comments explaining the components
+
+```
+1   <== this is the sequence number
+00:00:01,000 --> 00:00:01,033  <=== Beginning and end time slice starting at 1 second to 1.033 seconds
+ANNOUNCE {"text":"Welcome to our show","duration":3}  <==== action to be ran
+ANIMATE djTable {"animationName":"deckTableOn", "loop":true,"bpmSync":true}  <==== action to be ran
+ <== blank line to seperate one cue from the next
+2 <== beginning of the next block
+00:00:02,000 --> 00:00:03,033  
+BPM110
+```
+
+See [Show Action Handlers](#Show-Action-Handlers) for how the actions in the subtitle file come to life in your scene
 
 ### Run Your Show
 
@@ -252,6 +289,30 @@ isPreviewMode().then(preview=>{
 })
 
 ```
+
+### Show Action Handlers
+
+Show action handlers are what convert the commands in the subtitle file into something in your scene
+
+There are two types of handlers provided.  Ones that have all the functionality they need and some that need you to finish them.  The latter require you to define how they function because there is no way to know exactly how each show will want to implement it.  For example the PAUSE action could mean lots of things, pause 1 animation but play another, hide one entity but show a different entity.  There is no way to predict all this so you must define it
+
+Provided handlers include
+
+* ShowAnimationActionHandler
+* ShowBpmActionHandler
+* DefineTargetGroupActionHandler
+
+Handlers that require you to define how they should function
+
+* ShowPauseAllActionHandler
+* ShowStopAllActionHandler
+* ShowAnounceActionHandler
+
+TODO SHOW HOW TO FINISH IMPLEMENTING
+
+### Make Your Own Show Action Handler
+
+TODO SHOW HOW
 
 ### Adjust Logging Levels
 

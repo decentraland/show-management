@@ -1,5 +1,6 @@
 import { Logger, LoggerFactory } from "../../logging/logging"
 import { ShowActionManager } from "../manageShowActions"
+import { removeItemFromArray } from "../utils"
 import { ActionParams, OnProcessListener, ShowActionHandler, ShowActionSupportArgs } from "./showActionHandler"
 import { parseActionWithOpts } from "./utils"
 
@@ -20,6 +21,9 @@ export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
   addOnProcessListener(listener:OnProcessListener<ActionParams<T>>){
     if(!this.callbacks) this.callbacks = []
     this.callbacks.push(listener)
+  }
+  removeOnProcessListener(listener:OnProcessListener<ActionParams<T>>) {
+    if(!this.callbacks) this.callbacks = removeItemFromArray(this.callbacks,listener)
   }
   matches(action: string,showActionMgr:ShowActionManager):boolean{ 
     const METHOD_NAME = "matches()"

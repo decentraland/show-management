@@ -143,9 +143,10 @@ export class ShowActionManager{
     return handlers
   }
 
-  getRegisteredHandler(name:string):ShowActionHandler<any>{  
-    return this.registeredActionHandlerMap[name]
+  getRegisteredHandler<T extends ShowActionHandler<any>>(name:string):T{  
+    return this.registeredActionHandlerMap[name] as T
   }
+  
   processAction(action:string,handler:ShowActionHandler<any>){
     const METHOD_NAME = "processAction"
     if(handler && !handler.matches){

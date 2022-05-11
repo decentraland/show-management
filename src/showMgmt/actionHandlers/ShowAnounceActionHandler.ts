@@ -14,7 +14,7 @@ export type ActionHandlerAnouncementParams={
 
 export class ShowAnounceActionHandler extends ShowActionHandlerSupport<ActionHandlerAnouncementParams>{
   public static DEFAULT_NAME = 'ANNOUNCE'
-  constructor(args:ShowActionSupportArgs<ActionHandlerAnouncementParams>){
+  constructor(args?:ShowActionSupportArgs<ActionHandlerAnouncementParams>){
     super(ShowAnounceActionHandler.DEFAULT_NAME,args)
   }
 

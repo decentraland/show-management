@@ -9,7 +9,8 @@ import { ActionParams } from './showActionHandler';
 /**
  * this is not the most flexible but works decently well.  
  * It searched for the first "{" and assumes is your json argument
- * expected a pattern of: ACTION_NAME TEXT_NO_SPACES2 ... (optional JSON string to be parsed)
+ * expected a pattern of: 
+ * ACTION_NAME TEXT_NO_SPACES TEXT_NO_SPACES2 ... (optional JSON string to be parsed as the very end) 
  *
  * @param str action to parse
  */ 

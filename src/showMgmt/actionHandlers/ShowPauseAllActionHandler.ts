@@ -32,10 +32,10 @@ export class ShowPauseAllActionHandler extends ShowBasicActionHandler{
     if(obj instanceof ShowEntityModel){
       var showEnt = obj as ShowEntityModel
       
-      this.logger.debug(METHOD_NAME,"pause/stopping",showEnt.entity.name,p)
+      this.logger.debug(METHOD_NAME,"pause/stopping",showEnt.entity.name)
       showEnt.stopAllAnimations()
     }else{
-      this.logger.debug(METHOD_NAME,"not a ShowEntityModel",obj.name,p)
+      this.logger.debug(METHOD_NAME,"not a ShowEntityModel",obj.name)
     }
   }
   

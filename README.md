@@ -8,7 +8,7 @@ Show Manager provides helpers to schedule when to play videos.  You can specify 
 
 - [Show Manager](#show-manager) 
 - [Configure Shows](#configure-shows) 
-- [Syncing Actions to Video] (#Syncing-Actions-to-Video)
+- [Syncing Actions to Video](#Syncing-Actions-to-Video)
 - [Run Your Show](#run-your-show) 
 - [Event Listeners](#event-listeners) 
 - [Display the Show Video](#Display-the-Show-Video)

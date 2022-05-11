@@ -9,7 +9,7 @@ export type ActionHandlerAnouncementParams={
   text:string
   duration?:number
   color?:string
-  fontSize?:string
+  fontSize?:number
 }
 
 export class ShowAnounceActionHandler extends ShowActionHandlerSupport<ActionHandlerAnouncementParams>{
@@ -24,6 +24,6 @@ export class ShowAnounceActionHandler extends ShowActionHandlerSupport<ActionHan
   }
   
   process(action: ActionParams<ActionHandlerAnouncementParams>, showActionMgr: ShowActionManager): void {
-    ui.displayAnnouncement(action.params.text,action.params.duration)
+    ui.displayAnnouncement(action.params.text,action.params.duration,undefined,action.params.fontSize)
   }
 }

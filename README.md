@@ -35,10 +35,21 @@ To use any of the helpers provided by this library:
    import * as showMgmt from '@dcl/show-management'
    ```
 
-> To be recognized you may also have to add an entry in tsconfig.json
-> ```
-> sdfs
-> ```
+To be recognized you may also have to add an entry in tsconfig.json under paths
+
+```
+{
+  "compilerOptions": {
+    ...
+    "paths": {
+		 "@dcl/show-management": [
+		        "node_modules/@dcl/show-management/dist/index.d.ts",
+		        "node_modules\\@dcl\\show-management\\dist\\index.d.ts"
+		      ]
+	}
+	...
+}
+```
 
 ## Usage
 

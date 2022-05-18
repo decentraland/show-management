@@ -15,7 +15,7 @@ Show Manager provides helpers to schedule when to play videos.  You can specify 
 - [Perform a specific action for a certian show](#Perform-a-specific-action-for-a-certian-show)
 - [Enable Debug UI](#Enable-Debug-UI)
 - [Show Action Handlers](#Show-Action-Handlers)
-- [Make Your Own Show Action Handler](#Make-Your-Show-Action-Handlers)
+- [Make Your Own Show Action Handler](#Make-Your-Show-Action-Handler)
 - [Adjust Logging Levels](#Adjust-Logging-Levels)
 
 
@@ -50,6 +50,7 @@ To be recognized you may also have to add an entry in tsconfig.json under paths
 	...
 }
 ```
+
 
 ## Usage
 
@@ -534,6 +535,39 @@ if(logHandlerAnimation) logHandlerAnimation.setLevel(showMgmt.LogLevel.TRACE)
 
 
 ```
+
+
+##  How the Show Management Library Syncs Actions to Videos
+
+To be able to sync actions to videos we need to know where in the video we are (video currentOffset).
+
+```mermaid
+sequenceDiagram
+    
+    VideoSystem->>onVideoEvent: subscribe
+    ShowManager->> SubtitleSystem : subscribe.onCueBeginListeners
+    loop onVideo event
+        onVideoEvent->>VideoSystem: notify video event
+    end
+    loop onUpdate(dt)
+        VideoSystem->>SubtitleSystem: time progressed
+        loop check for cues to fire
+            SubtitleSystem->>SubtitleSystem: check for cues to fire
+            SubtitleSystem->>SubtitleSystem : onCueBeginListeners: notify cue began
+            SubtitleSystem-->>ShowManger : runAction
+        end
+    end
+    
+```
+
+The onVideoEvent listener tells us the video is playing, paused, buffering etc.  The onVideoEvent also provides currentOffset which is the video currentOffset time.  You may be wondering why dont we just use onVideoEvent.  It is because the update event does not fire frequently enough to get precise time.  If we only need to know currentOffset updated every second or we would be done.    But for syncing of actions to video we need it to be much more precise.
+
+
+The VideoSystem keeps track of the delta time from the game clock.  The onVideoEvent listener tells the system when the video is playing.  While the video is playing the system can increment its estimatedOffset using the currentOffset provided by the onVideoEvent listener.  We can now keep track of what time in the video we are at with subsecond precision.  
+
+Now that we have precision video offset we can make use of a SubtitleSystem.  The system reads in an SRT format and using the known video offset decides which actions to fire.
+
+
 
 ## Copyright info
 

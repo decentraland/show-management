@@ -577,17 +577,17 @@ Now that we have precision video offset we can make use of a SubtitleSystem.  Th
 classDiagram
 
 
-ShowManager --o SubtitleVideoSystem : Manages Video and Subtitle
+ShowManager "1" o-- "1" SubtitleVideoSystem : Manages Video and Subtitle
 SubtitleVideoSystem --|> VideoSystem
-SubtitleVideoSystem --o SubtitleSystem
+SubtitleVideoSystem "1" o-- "1" SubtitleSystem
 VideoSystem : VideoTexture videoTexture
 VideoSystem --o onVideoEvent
 
-ShowManager "1" --o  "*" ShowActionManager : managers actions
-ShowActionManager "1" --o  "*" ShowEntity : registers
-ShowActionManager "1" --o  "*" ShowActionHandler : registers
+ShowManager "1" o--  "1" ShowActionManager : managers actions
+ShowActionManager "1" o--  "*" ShowEntity : registers
+ShowActionManager "1" o--  "*" ShowActionHandler : registers
 
-RunOfShowSystem --o ShowManager : Schedules Videos
+RunOfShowSystem o-- ShowManager : Schedules Videos
 
 class ISystem{
     <<interface>>

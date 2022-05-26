@@ -1,6 +1,6 @@
-## Show Manager
+## Show Management
 
-Show Manager provides helpers to schedule when to play videos.  You can specify a specific time a video should play and in what order to play the videos.  It also provides a way to and sychronize actions with those videos to make much more emersive show
+Show Management Library enables you to schedule videos and synchronize actions with those videos to make a much more immersive show. 
 
 
 # Show Manager Documentation

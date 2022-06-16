@@ -19,6 +19,11 @@ Show Manager provides helpers to schedule when to play videos.  You can specify 
 - [Adjust Logging Levels](#Adjust-Logging-Levels)
 
 
+## Video Tutorial
+
+[https://www.youtube.com/watch?v=meinFw55azQ](https://www.youtube.com/watch?v=meinFw55azQ)
+
+
 ## Install
 
 To use any of the helpers provided by this library:

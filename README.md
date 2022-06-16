@@ -1,6 +1,6 @@
-## Show Manager
+## Show Management
 
-Show Manager provides helpers to schedule when to play videos.  You can specify a specific time a video should play and in what order to play the videos.  It also provides a way to and sychronize actions with those videos to make much more emersive show
+Show Management Library enables you to schedule videos and synchronize actions with those videos to make a much more immersive show. 
 
 
 # Show Manager Documentation
@@ -15,7 +15,7 @@ Show Manager provides helpers to schedule when to play videos.  You can specify 
 - [Perform a specific action for a certian show](#Perform-a-specific-action-for-a-certian-show)
 - [Enable Debug UI](#Enable-Debug-UI)
 - [Show Action Handlers](#Show-Action-Handlers)
-- [Make Your Own Show Action Handler](#Make-Your-Show-Action-Handlers)
+- [Make Your Own Show Action Handler](#Make-Your-Show-Action-Handler)
 - [Adjust Logging Levels](#Adjust-Logging-Levels)
 
 
@@ -55,6 +55,7 @@ To be recognized you may also have to add an entry in tsconfig.json under paths
 	...
 }
 ```
+
 
 ## Usage
 
@@ -538,6 +539,108 @@ const logHandlerAnimation = showMgmt.LoggerFactory.getLogger("ShowActionHandler.
 if(logHandlerAnimation) logHandlerAnimation.setLevel(showMgmt.LogLevel.TRACE)
 
 
+```
+
+
+##  How the Show Management Library Syncs Actions to Videos
+
+To be able to sync actions to videos we need to know where in the video we are (video currentOffset).
+
+```mermaid
+sequenceDiagram
+    
+    ShowManager->> ShowManager : playVideo
+    ShowManager->> VideoSystem : init
+    VideoSystem->>onVideoEvent: subscribe
+    VideoSystem->> SubtitleSystem : init
+    loop onVideo event
+        onVideoEvent->>VideoSystem: notify video event
+    end
+    ShowManager->> SubtitleSystem : subscribe.onCueBeginListeners
+    loop onUpdate(dt)
+        VideoSystem->>SubtitleSystem: time progressed
+        loop check for cues to fire
+            SubtitleSystem->>SubtitleSystem: check for cues to fire
+            SubtitleSystem->>SubtitleSystem : onCueBeginListeners: notify cue began
+            SubtitleSystem-->>ShowManager : runAction
+        end
+    end
+    
+```
+
+The onVideoEvent listener tells us the video is playing, paused, buffering etc.  The onVideoEvent also provides currentOffset which is the video currentOffset time.  You may be wondering why dont we just use onVideoEvent.  It is because the update event does not fire frequently enough to get precise time.  If we only need to know currentOffset updated every second or we would be done.    But for syncing of actions to video we need it to be much more precise.
+
+
+The VideoSystem keeps track of the delta time from the game clock.  The onVideoEvent listener tells the system when the video is playing.  While the video is playing the system can increment its estimatedOffset using the currentOffset provided by the onVideoEvent listener.  We can now keep track of what time in the video we are at with subsecond precision.  
+
+Now that we have precision video offset we can make use of a SubtitleSystem.  The system reads in an SRT format and using the known video offset decides which actions to fire.
+
+
+### Class Diagram
+
+```mermaid
+classDiagram
+
+
+ShowManager "1" o-- "1" SubtitleVideoSystem : Manages Video and Subtitle
+SubtitleVideoSystem --|> VideoSystem
+SubtitleVideoSystem "1" o-- "1" SubtitleSystem
+VideoSystem : VideoTexture videoTexture
+VideoSystem --o onVideoEvent
+
+ShowManager "1" o--  "1" ShowActionManager : managers actions
+ShowActionManager "1" o--  "*" ShowEntity : registers
+ShowActionManager "1" o--  "*" ShowActionHandler : registers
+
+RunOfShowSystem o-- ShowManager : Schedules Videos
+
+class ISystem{
+    <<interface>>
+    update(dt:number)
+}
+class onVideoEvent{
+    add(listener)
+}
+class RunOfShowSystem{
+    update(dt:number)
+}
+class ShowActionManager{
+    registerShowEntity(name:string,object:any)
+    registerHandler(action:ShowActionHandler<any>)
+    processAction(action:string,handler:ShowActionHandler<any>)
+    runAction(action: string)
+}
+
+class ShowEntity{
+  appear:() => void
+  hide:() => void
+  play:() => void
+  stop:() => void
+  triggerEvent: (index: number)=>void
+}
+
+class ShowActionHandler{ 
+  matches(action:string,showActionMgr:ShowActionManager):boolean
+  execute(action:string,showActionMgr:ShowActionManager):void
+  getName():string
+  addOnProcessListener(listener:OnProcessListener<ActionParams<T>>):void
+  removeOnProcessListener(listener:OnProcessListener<ActionParams<T>>):void
+  decodeAction(action:string,showActionMgr:ShowActionManager):ActionParams<T>
+}
+class ShowManager{
+    pause()
+    play()
+    startShow(showData: ShowType) 
+    playVideo(showData: ShowType, offsetSeconds: number)
+    addVideoStatusChangeListener(listener:VideoChangeStatusListener)
+    addPlayVideoListeners(callback:(event:PlayShowEvent)=>void)
+    addStopShowListeners(callback:(event:StopShowEvent)=>void)
+    enableDebugUI(val:boolean)
+}
+class SubtitleSystem{
+    addCueListener(listener:(cue: NodeCue,event:SubtitleCueEvent))
+    onCueBegin(cue: NodeCue)
+}
 ```
 
 ## Copyright info

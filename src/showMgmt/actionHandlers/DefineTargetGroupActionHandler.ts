@@ -23,8 +23,8 @@ export class DefineTargetGroup{
   targets:any[]
   constructor(args:DefineTargetGroupType){
     this.name = args.name
-    this.targetNames = args.targetNames
-    this.targets = args.targets  
+    if(args.targetNames) this.targetNames = args.targetNames
+    if(args.targets  ) this.targets = args.targets  
   }
 }
 
@@ -63,6 +63,9 @@ export class DefineTargetGroupActionHandler extends ShowActionHandlerSupport<Def
   process(action: ActionParams<DefineActionParams<DefineTargetGroupType>>, showActionMgr: ShowActionManager): boolean {
     //showActionMgr.en
     //action.params.opts.targets
+    if(!action.params || !action.params.opts){
+      throw new Error("ERROR DefineTargetGroupActionHandler invalid action params")
+    }
     showActionMgr.registerShowEntity(action.params.name,new DefineTargetGroup(action.params.opts))
     
     return true

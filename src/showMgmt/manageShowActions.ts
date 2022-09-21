@@ -168,11 +168,15 @@ export class ShowActionManager{
   processActions(actions:string[],handlers:ShowActionHandler<any>| ShowActionHandler<any>[]){
     for(const a in actions){
       const action = actions[a]
-      for(const p in handlers){
-        const handler = handlers[p]
-        
-        //const matched =  
-        this.processAction(action,handler)  
+      if(Array.isArray(handlers)){
+        for(const p in handlers){
+          const handler = handlers[p]
+          
+          //const matched =  
+          this.processAction(action,handler)  
+        }
+      }else{
+        this.processAction(action,handlers)  
       }
     }
   }
@@ -258,7 +262,7 @@ export class ShowActionManager{
 }
 
 const RESET_ANIMATION_ON_PLAY = true
-const NO_INTERVAL_SET = undefined
+//const NO_INTERVAL_SET = undefined
 
 //let currentAnim = 1
 

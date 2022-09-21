@@ -6,7 +6,9 @@ export class ShowActionMember{
   enabled:boolean
 }*/
 
-
+/**
+ * if matches returns true, execute is called.  provided an implementation of decodeAction should you not want to parse action in the execute itself
+ */
 export type OnProcessListener<T>=(action: T,showActionMgr:ShowActionManager)=>void
 
 export type ActionParams<T>={

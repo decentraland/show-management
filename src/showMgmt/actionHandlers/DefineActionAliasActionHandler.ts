@@ -35,22 +35,31 @@ export class DefineActionAliasActionHandler extends ShowActionHandlerSupport<Def
     const optArr = arr.length > 3 ? arr.splice(3).join(" ") : undefined
 
     //convert to type
-    result.params = { type: arr[1],name:arr[2], opts: {action: optArr} }
+    result.params = { type: arr[1],name:arr[2], opts: {action: (optArr) ? optArr : "unknown"} }
     
     return result
   }
   process(action: ActionParams<DefineActionParams<DefineActionAlias>>, showActionMgr: ShowActionManager): boolean {
     //register the alias as a new action handler ... very meta
- 
+    
     const mainProcessActionArg = action
     
+    if(mainProcessActionArg === undefined || mainProcessActionArg.params === undefined ||
+      mainProcessActionArg.params.opts === undefined ){
+      throw new Error("ERROR DefineActionAliasActionHandler invalid action")
+    }
     //const handler = new ...
     showActionMgr.registerHandler( 
       new ShowBasicActionHandler( mainProcessActionArg.params.name,
         {
           process(action: ActionParams<string>, showActionMgr: ShowActionManager): boolean {
-            log("DefineActionAliasActionHandler handling action",action)
             //debugger
+            if(mainProcessActionArg === undefined || mainProcessActionArg.params === undefined ||
+              mainProcessActionArg.params.opts === undefined){
+                throw new Error("ERROR DefineActionAliasActionHandler invalid action")
+            }
+            log("DefineActionAliasActionHandler handling action",action)
+            
             showActionMgr.runAction( mainProcessActionArg.params.opts.action )
             return true
           }

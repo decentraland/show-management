@@ -59,7 +59,7 @@ export class LoggerFactory{
 export class Logger {
     name:string
     //contextData:LoggerContextData
-    level:LogLevel
+    level:LogLevel = LogLevel.INFO
 
     constructor( name:string/*,contextData?:LoggerContextData*/ ){
         this.name = name

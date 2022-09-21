@@ -4,11 +4,15 @@ import { removeItemFromArray } from "../utils"
 import { ActionParams, OnProcessListener, ShowActionHandler, ShowActionSupportArgs } from "./showActionHandler"
 import { parseActionWithOpts } from "./utils"
 
+/**
+ * Base helper implementation of action handler
+ * 
+ */
 export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
   name:string
-  callbacks:OnProcessListener<ActionParams<T>>[]
+  callbacks?:OnProcessListener<ActionParams<T>>[]
   logger:Logger
-  constructor(name:string,args:ShowActionSupportArgs<T>){
+  constructor(name:string,args?:ShowActionSupportArgs<T>){
     if(args && args.matches) this.matches = args.matches 
     //if(args && args.execute) this.execute = args.execute 
     this.name = name
@@ -23,7 +27,7 @@ export class ShowActionHandlerSupport<T> implements ShowActionHandler<T>{
     this.callbacks.push(listener)
   }
   removeOnProcessListener(listener:OnProcessListener<ActionParams<T>>) {
-    if(!this.callbacks) this.callbacks = removeItemFromArray(this.callbacks,listener)
+    if(!this.callbacks && this.callbacks !== undefined) this.callbacks = removeItemFromArray(this.callbacks,listener)
   }
   matches(action: string,showActionMgr:ShowActionManager):boolean{ 
     const METHOD_NAME = "matches()"

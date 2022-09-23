@@ -65,7 +65,7 @@ To be recognized you may also have to add an entry in tsconfig.json under paths
 You will need need to create a ShowManager instance to start and assign it a schedule
 
 ```ts
-import * as showMgmt from 'show-mgmt-dcl'
+import * as showMgmt from '@dcl/show-management'
 
 const showData: showMgmt.ShowDataType = ...
 
@@ -121,7 +121,7 @@ Here is one of many free helpful converter tools [https://www.epochconverter.com
 #### Configure Show Example
 
 ```ts
-import * as showMgmt from 'show-mgmt-dcl'
+import * as showMgmt from '@dcl/show-management'
 
 //while testing this can ensure the video start time is always 5 seconds after scene load
 const testStartTime = new Date(Date.now() + (5 *1000)).getTime() / 1000   
@@ -178,7 +178,7 @@ See [Show Action Handlers](#Show-Action-Handlers) for how the actions in the sub
 You will need need to create a RunOfShowSystem instance should you want the show to play by it self when the startTime dictage
 
 ```ts
-import * as showMgmt from 'show-mgmt-dcl'
+import * as showMgmt from '@dcl/show-management'
 
 export const runOfShow = new showMgmt.RunOfShowSystem(SHOW_MGR)
 engine.addSystem(runOfShow)
@@ -195,7 +195,7 @@ The Show Manager has no knowlege of your scene and how it should react to the vi
 * addVideoStatusChangeListener
 
 ```ts
-import * as showMgmt from 'show-mgmt-dcl'
+import * as showMgmt from '@dcl/show-management'
 
 SHOW_MGR.addStopShowListeners( (event:showMgmt.StopShowEvent)=>{
   log("addStopShowListeners fired",event)

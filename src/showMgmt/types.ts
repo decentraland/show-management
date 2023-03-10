@@ -8,6 +8,7 @@ export type ShowType = {
   id: number
   link: string
   subs?: string
+  subtitleId?: string
   startTime?: number
   length?: number
   artist?: string

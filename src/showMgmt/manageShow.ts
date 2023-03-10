@@ -69,11 +69,13 @@ export class ShowManager{
     return this.videoSystem !== undefined && this.videoSystem.videoTexture.playing !== undefined && this.videoSystem.videoTexture.playing 
   }
   pause(){
-    this.videoSystem.pause()
+    const METHOD_NAME="pause"
+    this.logger.debug(METHOD_NAME,"") 
+    if(this.videoSystem) this.videoSystem.pause()
     this.runAction(ShowPauseAllActionHandler.DEFAULT_NAME)
   }
   play(){
-    this.videoSystem.play()
+    if(this.videoSystem) this.videoSystem.play()
 
     //this.runAction(ShowPauseAllActionHandler.RESUME)
   }

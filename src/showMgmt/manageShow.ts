@@ -65,6 +65,9 @@ export class ShowManager{
     this.manageShowDebugUI.setEnabled(val)
     
   }
+  isPlaying():boolean{
+    return this.videoSystem !== undefined && this.videoSystem.videoTexture.playing !== undefined && this.videoSystem.videoTexture.playing 
+  }
   pause(){
     this.videoSystem.pause()
     this.runAction(ShowPauseAllActionHandler.DEFAULT_NAME)

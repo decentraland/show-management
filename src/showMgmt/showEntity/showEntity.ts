@@ -10,6 +10,8 @@ export type SyncedEntityVideoExtConstructorArgs = SyncedEntityExtConstructorArgs
 export type SyncedEntityModelExtConstructorArgs = SyncedEntityExtConstructorArgs & {
   startInvisible?: boolean
   transform?: TransformConstructorArgs
+  /** defaults to true, if set to false the animator is not be initialized by default, if idleAnim or any play animation is called it will be initialized */
+  initAnimator?: boolean
   idleAnim?: string
   events?: (() => void)[]
 }

@@ -30,13 +30,20 @@ export class ShowEntityModel extends ShowEntitySupport {
             }
       )
     )
-    this.entity.addComponent(new Animator())
 
     if (extArgs.startInvisible) {
       this.hide()
     }
 
+    let initAnimator = extArgs.initAnimator === undefined || extArgs.initAnimator === true
+
+    if(initAnimator){
+      this.ensureHasAnimator()
+    }
+    
     if (extArgs.idleAnim) {
+      this.ensureHasAnimator()
+
       this.idleAnim = new AnimationState(extArgs.idleAnim, { looping: true })
       this.entity.getComponent(Animator).addClip(this.idleAnim)
       this.idleAnim.play()
@@ -56,6 +63,9 @@ export class ShowEntityModel extends ShowEntitySupport {
     this.intervalAnimTimer = new Entity()
     engine.addEntity(this.intervalAnimTimer)
     return this
+  }
+  ensureHasAnimator(){
+    if( !this.entity.hasComponent(Animator) )this.entity.addComponent(new Animator())
   }
   appear() {
     this.entity.getComponent(GLTFShape).visible = true
@@ -99,6 +109,7 @@ export class ShowEntityModel extends ShowEntitySupport {
       this.entity.getComponent(GLTFShape).visible = true
     }
 
+    this.ensureHasAnimator()
     const animator = this.entity.getComponent(Animator)
     
     let newAnim = this.entity.getComponent(Animator).getClip(animationName)
@@ -174,6 +185,7 @@ export class ShowEntityModel extends ShowEntitySupport {
       this.idleAnim.stop()
     }
 
+    this.ensureHasAnimator()
     this.idleAnim = new AnimationState(animName, { looping: true })
     this.entity.getComponent(Animator).addClip(this.idleAnim)
     this.idleAnim.play()

@@ -67,7 +67,11 @@ export class ShowEntityModel extends ShowEntitySupport {
   ensureHasAnimator(){
     if( !this.entity.hasComponent(Animator) )this.entity.addComponent(new Animator())
   }
+  isVisible(){
+    return this.entity.alive && this.entity.getComponent(GLTFShape).visible
+  }
   appear() {
+    if(!this.entity.alive) engine.addEntity(this.entity)
     this.entity.getComponent(GLTFShape).visible = true
   }
   hide() {
@@ -105,8 +109,9 @@ export class ShowEntityModel extends ShowEntitySupport {
       this.intervalAnimTimer.removeComponent(utils.Interval)
     }
 
-    if (!this.entity.getComponent(GLTFShape).visible) {
-      this.entity.getComponent(GLTFShape).visible = true
+    if (!this.isVisible()) {
+      //TODO do we want this to auto show?
+      this.appear()
     }
 
     this.ensureHasAnimator()

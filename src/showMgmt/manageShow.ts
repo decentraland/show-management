@@ -42,6 +42,11 @@ export class ShowManager{
   stopShowListeners: ((event: StopShowEvent)=>void)[] = []
   changeStatusListeners:VideoChangeStatusListener[] = []
 
+  sceneNotActiveYetToPlay: ShowType | null
+  playPermissionsRequiredEnabled = false
+  checkFirstTimeDone = false //default is true, only if you need sceneActive controls will you use this
+  playPermissionsGiven = false //default is true, only if you need sceneActive controls will you use this
+
   manageShowDebugUI:ManageShowDebugUI
   
   //latestWorldTime:Date
@@ -83,10 +88,29 @@ export class ShowManager{
     const METHOD_NAME="isCurrentlyPlaying"
     const retVal = showData && this.currentlyPlaying && this.currentlyPlaying.id === showData.id
     this.logger.trace(METHOD_NAME,"",retVal,showData,this.currentlyPlaying) 
-    return retVal
+    return retVal 
+  }
+  setPlayPermissionsRequiredEnabled(val:boolean){
+    this.playPermissionsRequiredEnabled = val
+  }
+  checkStartFirstTime(){
+    const METHOD_NAME="checkStartFirstTime"
+    if(this.checkFirstTimeDone){
+      return; 
+    }
+    
+    this.checkFirstTimeDone = true;
+
+    if(this.sceneNotActiveYetToPlay === undefined || this.sceneNotActiveYetToPlay === null){
+      log(METHOD_NAME,"nothing queued to start!!!")
+      return;
+    }
+    log(METHOD_NAME,"finally starting!!!")
+    this.startShow(this.sceneNotActiveYetToPlay)  
   }
   startShow(showData: ShowType) {
     const METHOD_NAME="startShow"
+    
     //TODO WHAT ABOUT PLAYING BUT NEED TO SEEK FORWARD
 
     //this.currentlyPlaying = null
@@ -96,10 +120,14 @@ export class ShowManager{
       return
     }
     const currentlyPlaying = this.isCurrentlyPlaying(showData)
-    if (currentlyPlaying){
-      this.logger.info(METHOD_NAME,"startShow.already playing ",this.currentlyPlaying)//,this.videoSystem.estimatedOffset)
+    if (currentlyPlaying && !this.isPlaying()){
+      this.logger.info(METHOD_NAME,"already playing, but paused, letting it init again ",this.currentlyPlaying)//,this.videoSystem.estimatedOffset)
+      
+    }else if (currentlyPlaying && this.isPlaying()){
+      this.logger.info(METHOD_NAME,"already playing ",this.currentlyPlaying)//,this.videoSystem.estimatedOffset)
       return
-    } 
+    }
+
 
     this.currentlyPlaying = showData
 
@@ -244,15 +272,24 @@ export class ShowManager{
         allActionNames.push( actionNames[p] )
       }
     }
-
+ 
     this.actionMgr.processActions(allActionNames,handlers)
 
-  }
+  } 
   playVideo(showData: ShowType, offsetSeconds: number) {
     const METHOD_NAME = "playVideo"
+    
     this.logger.info(METHOD_NAME,'playVideo show ', showData)
 
     this.stopShow()
+
+
+    if(this.playPermissionsRequiredEnabled && (!this.checkFirstTimeDone && !this.playPermissionsGiven)){
+      //debugger 
+      this.logger.info(METHOD_NAME,"intercepted play because checkFirstTimeDone not started yet ",showData)//,this.videoSystem.estimatedOffset)
+      this.sceneNotActiveYetToPlay = showData
+      return;
+    }
 
     if(this.manageShowDebugUI && this.manageShowDebugUI.enabled){
       this.manageShowDebugUI.updateDisplayNameValue( showData.artist )
